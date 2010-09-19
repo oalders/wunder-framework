@@ -1,0 +1,53 @@
+<form action="[% action %]" method="post">
+  
+[% IF action_rm %]
+<input type="hidden" name="rm" value="[% action_rm %]" [% IF upload %]enctype="multipart/form-data"[% END %]>
+[% END %]
+
+[% FOREACH row IN form_loop %]
+  [% IF row.hidden %]
+    [% row.element %]
+  [% END %]
+[% END %]
+
+<table>
+
+[% FOREACH row IN form_loop %]
+
+  [% UNLESS row.hidden %]
+    <tr>
+      <td [% IF row.dfv_error %]class="tip"[% END %]>
+        [% row.name %]
+        <br />
+        [% row.dfv_error %]
+      </td>
+      <td><div id="[% row.column_name %]_div">[% row.element %]</div></td>
+    </tr>
+  [% END %]
+
+[% END %]
+
+  <tr>
+    <td colspan="2">
+      <div style="width:200px;margin-left:auto;margin-right:auto">
+          <button class="button positive" type="submit">
+              <img
+                  src="/css/bluetrip/img/icons/tick.png"
+                  alt=""
+              /> Submit
+          </button>
+          <button class="button negative" type="reset">
+
+              <img
+                  src="/css/bluetrip/img/icons/cross.png"
+                  alt=""
+              /> Reset
+          </button>
+      </div>
+    </td>
+  </tr>
+
+</table>
+
+</form>
+

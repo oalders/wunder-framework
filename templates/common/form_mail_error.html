@@ -1,0 +1,28 @@
+<html>
+<head><title>Form Error</title></head>
+<body bgcolor="#FFFFFF">
+<font face="Arial">
+<center><h2>Form Error</h2></center><p>
+The following problems were encountered:<p>
+
+<!-- You may change the HTML on this form, but do not remove the line below -->
+[% FOREACH error IN errors %]
+[% error.field_name %]: [% error.message %]<br />
+[% END %]
+<!-- You may change the HTML below this line -->
+
+<p>
+<NOSCRIPT>
+Please click your browser's back button to correct your information and submit the form again.
+</NOSCRIPT>
+
+<script type="text/javascript" language="JavaScript">
+<!--
+document.write('<A HREF="javascript:history.go(-1)">Click here</a> to correct your information and submit the form again.');
+// -->
+</script>
+
+</body>
+
+</html>
+

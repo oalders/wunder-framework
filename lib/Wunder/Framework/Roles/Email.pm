@@ -1,0 +1,154 @@
+package Wunder::Framework::Roles::Email;
+
+use Moose::Role;
+
+#requires 'config';
+#requires 'dt';
+
+use Modern::Perl;
+use Data::Dump qw( dump );
+use DateTime::Format::Mail;
+use MIME::Lite;
+use Params::Validate qw( validate SCALAR );
+
+=head1 SYNOPSIS
+
+The various roles required for sending email via generic methods
+
+=head2 send_msg( $msg )
+
+Requires a MIME::Lite object.
+
+Try to offload emailing onto external machines. If the first attempt
+fails, use sendmail, which will queue the message if it's unable to send from
+here. A failed connection on the SMTP method will result in the message not
+being delivered and we may never know about it.
+
+To use SMTP, something like the following needs to be in the config file:
+
+<smtp>
+    default = 1
+    enabled = 1
+    server = smtp.cybercon.com
+    timeout = 5
+</smtp>
+
+=head2 mail_admin( subject => 'report', data => 'some data' )
+
+Simple method to email reports etc to admin.  Required "contact"
+section to be configured in config file.  If it's an urgent message, the pager
+param should be set to 1.
+
+=cut
+
+sub send_msg {
+
+    my $self = shift;
+    my $msg  = shift;
+
+    # attach a date stamp to the msg
+    my $stamp = DateTime::Format::Mail->format_datetime( $self->dt );
+    $msg->replace( Date => $stamp );
+
+    if ( exists $self->config->{email}->{outgoing_headers} ) {
+        my %headers = %{ $self->config->{email}->{outgoing_headers} };
+        foreach my $header ( keys %headers ) {
+            $msg->add( $header => $headers{$header} );
+        }
+    }
+
+    my $success = 0;
+
+    my $smtp = $self->config->{'smtp'};
+
+    # is SMTP our first choice?
+    if ( $smtp && $smtp->{'default'} ) {
+        return 1 if $self->_send_by_smtp( $msg );
+    }
+
+    return 1 if $msg->send_by_sendmail;
+    return $self->_send_by_smtp( $msg );
+
+}
+
+
+
+sub mail_admin {
+
+    my $self = shift;
+
+    my %rules = (
+        data      => { type => SCALAR, },
+        data_type => { type => SCALAR, optional => 1, default => 'txt' },
+        pager   => { type => SCALAR, optional => 1 },
+        subject => {
+            type     => SCALAR,
+            optional => 1,
+            default  => $ENV{'SERVER_NAME'},
+        },
+    );
+
+    my %args = validate( @_, \%rules );
+    my $contact = $self->config->{'contact'};
+
+    my $msg = MIME::Lite->new(
+        From    => $contact->{'from'},
+        To      => $contact->{'notify'},
+        Subject => $args{'subject'},
+        Type    => 'multipart/mixed',
+    );
+
+    my %type = (
+        txt  => 'TEXT',
+        html => 'text/html',
+    );
+
+    my $part = MIME::Lite->new(
+        Type => $type{ $args{'data_type'} },
+        Data => $args{'data'},
+    );
+
+    $msg->attach( $part );
+
+    if (   exists $args{'pager'}
+        && $args{'pager'}
+        && exists $contact->{'pager'} )
+    {
+        $msg->add( Cc => $contact->{'pager'} );
+    }
+
+    return $self->send_msg( $msg );
+
+}
+
+sub _send_by_smtp {
+
+    my $self = shift;
+    my $msg  = shift;
+
+    my $smtp = $self->config->{'smtp'};
+    return 0 if !$smtp || !$smtp->{'enabled'};
+
+    return eval {
+        $msg->send( 'smtp', $smtp->{'server'},
+            Timeout => $smtp->{'timeout'} );
+    };
+
+}
+
+=head1 AUTHOR
+
+    Olaf Alders
+    CPAN ID: OALDERS
+    WunderCounter.com
+    olaf@wundersolutions.com
+    http://www.wundercounter.com
+
+=head1 COPYRIGHT
+
+This program is free software; you can redistribute
+it and/or modify it under the same terms as Perl itself.
+
+=cut
+
+1;
