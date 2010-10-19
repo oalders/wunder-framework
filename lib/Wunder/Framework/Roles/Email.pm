@@ -59,7 +59,7 @@ sub send_msg {
 
     my $success = 0;
 
-    my $smtp = $self->config->{'smtp'};
+    my $smtp = $self->config->{email}->{smtp};
 
     # is SMTP our first choice?
     if ( $smtp && $smtp->{'default'} ) {
@@ -126,15 +126,18 @@ sub _send_by_smtp {
     my $self = shift;
     my $msg  = shift;
 
-    my $smtp = $self->config->{'smtp'};
+    my $smtp = $self->config->{email}->{smtp};
     return 0 if !$smtp || !$smtp->{'enabled'};
 
-    return eval {
-        $msg->send( 'smtp', $smtp->{'server'},
-            Timeout => $smtp->{'timeout'} );
-    };
+    my $result =
+        eval { $msg->send_by_smtp( $smtp->{'server'}, %{ $smtp->{args} } ); };
+
+    #warn $result;
+
+    return $msg->last_send_successful;
 
 }
+
 
 =head1 AUTHOR
 
