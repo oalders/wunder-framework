@@ -160,7 +160,7 @@ sub _send_by_smtp {
 
     my $self = shift;
     my $msg  = shift;
-    my $conf = shift || $self->smtp_conf;
+    my $conf = $self->smtp_conf;
 
     return 0 if !$conf || !$conf->{'enabled'};
 
