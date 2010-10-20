@@ -11,6 +11,13 @@ use DateTime::Format::Mail;
 use MIME::Lite;
 use Params::Validate qw( validate SCALAR );
 
+has 'smtp_conf' => ( is => 'rw', lazy_build => 1, );
+
+sub _build_smtp_conf {
+    my $self = shift;
+    return $self->config->{email}->{smtp};
+}
+
 =head1 SYNOPSIS
 
 The various roles required for sending email via generic methods
@@ -26,18 +33,22 @@ being delivered and we may never know about it.
 
 To use SMTP, something like the following needs to be in the config file:
 
-<smtp>
-    default = 1
-    enabled = 1
-    server = smtp.cybercon.com
-    timeout = 5
-</smtp>
-
-=head2 mail_admin( subject => 'report', data => 'some data' )
-
-Simple method to email reports etc to admin.  Required "contact"
-section to be configured in config file.  If it's an urgent message, the pager
-param should be set to 1.
+<email>
+    <outgoing_headers>
+        Sender          = mail@domain.com
+        X-Envelope-From = mail@domain.com
+    </outgoing_headers>
+    <smtp>
+        default = 1
+        enabled = 1
+        server = smtp.domain.com
+        <args>
+            Timeout  = 300
+            #Port     = 26
+            Debug    = 1
+        </args>
+    </smtp>
+</email>
 
 =cut
 
@@ -46,23 +57,22 @@ sub send_msg {
     my $self = shift;
     my $msg  = shift;
 
-    # attach a date stamp to the msg
-    my $stamp = DateTime::Format::Mail->format_datetime( $self->dt );
-    $msg->replace( Date => $stamp );
+    $msg = $self->datestamp_msg( $msg );
 
+    # these are for defaults. don't clobber existing headers
     if ( exists $self->config->{email}->{outgoing_headers} ) {
         my %headers = %{ $self->config->{email}->{outgoing_headers} };
         foreach my $header ( keys %headers ) {
-            $msg->add( $header => $headers{$header} );
+            if ( !$msg->get( $header ) ) {
+                $msg->add( $header => $headers{$header} );
+            }
         }
     }
 
-    my $success = 0;
-
-    my $smtp = $self->config->{email}->{smtp};
+    my $conf = $self->smtp_conf;
 
     # is SMTP our first choice?
-    if ( $smtp && $smtp->{'default'} ) {
+    if ( $conf && $conf->{'default'} ) {
         return 1 if $self->_send_by_smtp( $msg );
     }
 
@@ -72,6 +82,31 @@ sub send_msg {
 }
 
 
+=head2 datestamp_msg( $msg )
+
+Attach a date stamp to the msg
+
+=cut
+
+sub datestamp_msg {
+
+    my $self = shift;
+    my $msg  = shift;
+
+    my $stamp = DateTime::Format::Mail->format_datetime( $self->dt );
+    $msg->replace( Date => $stamp );
+
+    return $msg;
+
+}
+
+=head2 mail_admin( subject => 'report', data => 'some data' )
+
+Simple method to email reports etc to admin.  Required "contact"
+section to be configured in config file.  If it's an urgent message, the pager
+param should be set to 1.
+
+=cut
 
 sub mail_admin {
 
@@ -125,19 +160,14 @@ sub _send_by_smtp {
 
     my $self = shift;
     my $msg  = shift;
+    my $conf = shift || $self->smtp_conf;
 
-    my $smtp = $self->config->{email}->{smtp};
-    return 0 if !$smtp || !$smtp->{'enabled'};
+    return 0 if !$conf || !$conf->{'enabled'};
 
-    my $result =
-        eval { $msg->send_by_smtp( $smtp->{'server'}, %{ $smtp->{args} } ); };
-
-    #warn $result;
-
+    $msg->send_by_smtp( $conf->{'server'}, %{ $conf->{args} } );
     return $msg->last_send_successful;
 
 }
-
 
 =head1 AUTHOR
 
