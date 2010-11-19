@@ -15,6 +15,11 @@ use Modern::Perl;
 
 Roles required for database interaction
 
+=head2 db_name( $schema_name )
+
+Return the name of the database used for a configured connection.  Returns
+db_name for default schema if no schema name is supplied
+
 =head2 dbh
 
 dbh lazy loading.  pings the server.  if connection has dropped, it will
@@ -88,6 +93,16 @@ sub schema {
     }
 
     return $cache->{$connection};
+
+}
+
+
+
+sub db_name {
+
+    my $self = shift;
+    my $name = $self->_validate_connection( shift );
+    return $self->config->{'db'}->{$name}->{database};
 
 }
 
