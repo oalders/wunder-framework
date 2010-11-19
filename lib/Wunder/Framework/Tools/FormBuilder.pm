@@ -1013,6 +1013,38 @@ sub expiration_year {
 
 }
 
+=head2 ip2country( $ip )
+
+Returns appropriate country_code for an IP.  Defaults to REMOTE_ADDR, but you
+can override this by passing an IP address.
+
+=cut
+
+sub ip2country {
+
+    my $self = shift;
+    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $record = $self->wf->best_geo->record_by_addr( $ip );
+    return $record ? $record->country_code : undef; 
+
+}
+
+=head2 ip2region( $ip )
+
+Returns appropriate region_code for an IP.  Defaults to REMOTE_ADDR, but you
+can override this by passing an IP address.
+
+=cut
+
+sub ip2region {
+
+    my $self = shift;
+    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $record = $self->wf->best_geo->record_by_addr( $ip );
+    return $record ? $record->region : undef; 
+
+}
+
 =head1 AUTHOR
 
     Olaf Alders
