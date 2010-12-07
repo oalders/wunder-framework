@@ -13,7 +13,7 @@ use Find::Lib '../lib';
 
 use Wunder::Framework::Versioning;
 
-my $versioning  = Wunder::Framework::Versioning->new;
+my $versioning  = Wunder::Framework::Versioning->new_with_options;
 my @schemas     = sort keys %{ $versioning->config->{'db'} };
 
 my @upgrade     = ( );

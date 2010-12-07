@@ -3,6 +3,8 @@ package Wunder::Framework::Versioning;
 use Moose;
 use Modern::Perl;
 
+with 'MooseX::Getopt';
+
 with 'Wunder::Framework::Roles::Config';
 with 'Wunder::Framework::Roles::Deployment';
 with 'Wunder::Framework::Roles::DBI';
@@ -20,6 +22,17 @@ use Data::Dump qw( dump );
 use File::Tools qw( mkpath );
 use IO::File;
 use Params::Validate qw( validate_pos HASHREF SCALAR );
+
+=head2 fresh_install
+
+If this is a fresh deployment, we don't want to ignore SQL patch files from
+any instance.
+
+perl versioning.pl --fresh_install
+
+=cut
+
+has 'fresh_install' => ( is => 'rw', isa => 'Bool', default => 0 );
 
 =head2 upgrade
 
@@ -66,7 +79,7 @@ sub upgrade {
 
         if (
              ( $self->stream eq 'dev' && $file !~ m{_} )
-          || ( $file =~ m{$ignore}xms )
+          || ( !$self->fresh_install && $file =~ m{$ignore}xms )
             ) {
             print "belongs to this stream -- skipping\n";
             next CHANGE;
