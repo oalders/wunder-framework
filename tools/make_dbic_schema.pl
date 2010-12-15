@@ -19,7 +19,7 @@ my $base    = Wunder::Framework::Bundle->new();
 my $config  = $base->config;
 my @schemas = keys %{ $config->{'db'} };
 
-my @menu = ( );
+my @menu = ();
 foreach my $name ( @schemas ) {
     push @menu, $name if $name =~ /write\z/;
 }
@@ -31,24 +31,28 @@ if ( scalar @menu == 0 ) {
     }
 }
 
-my $update_schema = prompt("Which schema would you like to update?", -m=> \@menu, -one_char);
+my $update_schema = prompt(
+    "Which schema would you like to update?",
+    -m => \@menu,
+    -one_char
+);
 
 print "You have chosen to update $update_schema\n";
-my $auth = prompt ( "Is this correct? (y/n) \n\n",  -onechar );
+my $auth = prompt( "Is this correct? (y/n) \n\n", -onechar );
 
-if ($auth eq 'y') {
+if ( $auth eq 'y' ) {
 
-    my $db = $config->{'db'}->{$update_schema};
+    my $db        = $config->{'db'}->{$update_schema};
     my $namespace = $db->{'namespace'};
     print "ok, updating $namespace\n";
     eval "require $namespace";
 
-    DBIx::Class::Schema::Loader->dump_to_dir( $base->path .'/lib' );
+    DBIx::Class::Schema::Loader->dump_to_dir( $base->path . '/lib' );
+
     #$namespace->dump_to_dir( $base->path .'/lib');
     $namespace->connection( $db->{'dsn'}, $db->{'user'}, $db->{'pass'} );
 
 }
-
 
 =head1 AUTHOR
 
