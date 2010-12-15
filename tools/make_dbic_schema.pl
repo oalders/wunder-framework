@@ -10,10 +10,19 @@ this script.
 
 use DBIx::Class::Schema::Loader;
 use Find::Lib '../lib/dev', '../lib';
+use Getopt::Long::Descriptive;
 use IO::Prompt;
 use Modern::Perl;
 
 use Wunder::Framework::Bundle;
+
+my ( $opt, $usage ) = describe_options(
+    'my-program %o <some-arg>',
+    [ 'all|a', "display all schemas in config" ],
+    [], [ 'help', "print usage message and exit" ],
+);
+
+print( $usage->text ), exit if $opt->help;
 
 my $base    = Wunder::Framework::Bundle->new();
 my $config  = $base->config;
@@ -21,7 +30,7 @@ my @schemas = keys %{ $config->{'db'} };
 
 my @menu = ();
 foreach my $name ( @schemas ) {
-    push @menu, $name if $name =~ /write\z/;
+    push @menu, $name if ( $opt->all || $name =~ /write\z/ );
 }
 
 # backwards compatibility for older naming schemes
