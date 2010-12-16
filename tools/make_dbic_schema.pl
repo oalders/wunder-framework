@@ -8,7 +8,7 @@ this script.
 
 =cut
 
-use DBIx::Class::Schema::Loader;
+use DBIx::Class::Schema::Loader qw( make_schema_at );
 use Find::Lib '../lib/dev', '../lib';
 use Getopt::Long::Descriptive;
 use IO::Prompt;
@@ -19,6 +19,7 @@ use Wunder::Framework::Bundle;
 my ( $opt, $usage ) = describe_options(
     'my-program %o <some-arg>',
     [ 'all|a', "display all schemas in config" ],
+    [ 'debug', "print debugging info" ],
     [], [ 'help', "print usage message and exit" ],
 );
 
@@ -48,18 +49,21 @@ my $update_schema = prompt(
 
 print "You have chosen to update $update_schema\n";
 my $auth = prompt( "Is this correct? (y/n) \n\n", -onechar );
+say '';
 
 if ( $auth eq 'y' ) {
 
     my $db        = $config->{'db'}->{$update_schema};
     my $namespace = $db->{'namespace'};
-    print "ok, updating $namespace\n";
-    eval "require $namespace";
-
-    DBIx::Class::Schema::Loader->dump_to_dir( $base->path . '/lib' );
-
-    #$namespace->dump_to_dir( $base->path .'/lib');
-    $namespace->connection( $db->{'dsn'}, $db->{'user'}, $db->{'pass'} );
+    say "ok, updating $namespace\n";
+    
+    make_schema_at(
+        $namespace,
+        { debug => $opt->debug,
+          dump_directory => $base->path . '/lib',
+        },
+        [ $db->{'dsn'}, $db->{'user'}, $db->{'pass'} ],
+    );
 
 }
 
