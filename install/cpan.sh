@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cpan Devel::Modlist
-cpan Geo::Coder::GoogleMaps
+cpanm Devel::Modlist
+cpanm Geo::Coder::GoogleMaps
