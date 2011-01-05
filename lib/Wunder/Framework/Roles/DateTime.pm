@@ -6,6 +6,7 @@ use Moose::Role;
 
 use Data::Dump qw( dump );
 use DateTime;
+use DateTime::Format::MySQL;
 use Devel::SimpleTrace;
 use Modern::Perl;
 use MooseX::Params::Validate;
@@ -17,6 +18,11 @@ Contains a role which instantiates a DateTime object to the correct time zone.
 =head2 dt( epoch => $epoch )
 
 Returns a DateTime object, initialized to the correct time zone.
+
+=head2 mysql_datetime( $dt )
+
+Returns a MySQL formatted datetime string. If no $dt is provided, the
+current time is returned.
 
 =cut
 
@@ -45,6 +51,11 @@ sub dt {
 
     return $dt;
 
+}
+
+sub mysql_datetime {
+    my $self = shift;
+    return DateTime::Format::MySQL->format_datetime( shift || $self->dt );
 }
 
 sub _build_time_zone {
