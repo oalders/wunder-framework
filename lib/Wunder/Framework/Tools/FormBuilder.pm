@@ -905,7 +905,7 @@ sub get_date_menu {
 
     push @elements, $q->popup_menu(
         -name => $name . '_year',
-        -values => [2006..$self->wf->dt->year + 5],
+        -values => [2006..($self->wf->dt->year + 5)],
         $readonly
     );
 
