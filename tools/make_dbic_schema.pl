@@ -20,6 +20,7 @@ my ( $opt, $usage ) = describe_options(
     'my-program %o <some-arg>',
     [ 'all|a', "display all schemas in config" ],
     [ 'debug', "print debugging info" ],
+    [ 'overwrite-modifications', 'overwrite modifications (helpful in case of checksum mismatch)' ],
     [], [ 'help', "print usage message and exit" ],
 );
 
@@ -61,6 +62,7 @@ if ( $auth eq 'y' ) {
         $namespace,
         { debug => $opt->debug,
           dump_directory => $base->path . '/lib',
+          overwrite_modifications => $opt->overwrite_modifications || 0,
         },
         [ $db->{'dsn'}, $db->{'user'}, $db->{'pass'} ],
     );
