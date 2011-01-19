@@ -8,6 +8,7 @@ this script.
 
 =cut
 
+use Data::Dump qw( dump );
 use DBIx::Class::Schema::Loader qw( make_schema_at );
 use Find::Lib '../lib/dev', '../lib';
 use Getopt::Long::Descriptive;
@@ -18,10 +19,14 @@ use Wunder::Framework::Bundle;
 
 my ( $opt, $usage ) = describe_options(
     'my-program %o <some-arg>',
-    [ 'all|a', "display all schemas in config" ],
-    [ 'debug', "print debugging info" ],
-    [ 'overwrite-modifications', 'overwrite modifications (helpful in case of checksum mismatch)' ],
-    [], [ 'help', "print usage message and exit" ],
+    [ 'all|a',        "display all schemas in config" ],
+    [ 'constraint=s', "table name regex" ],
+    [ 'debug',        "print debugging info" ],
+    [   'overwrite-modifications',
+        'overwrite modifications (helpful in case of checksum mismatch)'
+    ],
+    [],
+    [ 'help', "print usage message and exit" ],
 );
 
 print( $usage->text ), exit if $opt->help;
@@ -57,13 +62,15 @@ if ( $auth eq 'y' ) {
     my $db        = $config->{'db'}->{$update_schema};
     my $namespace = $db->{'namespace'};
     say "ok, updating $namespace\n";
-    
-    make_schema_at(
-        $namespace,
-        { debug => $opt->debug,
-          dump_directory => $base->path . '/lib',
-          overwrite_modifications => $opt->overwrite_modifications || 0,
-        },
+
+    my $args = {
+        constraint => $opt->constraint || undef,
+        debug => $opt->debug,
+        dump_directory          => $base->path . '/lib',
+        overwrite_modifications => $opt->overwrite_modifications || 0,
+    };
+
+    make_schema_at( $namespace, $args,
         [ $db->{'dsn'}, $db->{'user'}, $db->{'pass'} ],
     );
 
