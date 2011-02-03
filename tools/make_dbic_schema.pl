@@ -64,11 +64,13 @@ if ( $auth eq 'y' ) {
     say "ok, updating $namespace\n";
 
     my $args = {
-        constraint => $opt->constraint || undef,
+        constraint => $opt->constraint || qr{.*},
         debug => $opt->debug,
         dump_directory          => $base->path . '/lib',
         overwrite_modifications => $opt->overwrite_modifications || 0,
     };
+
+    say "args: " . dump( $args ) if $opt->debug;
 
     make_schema_at( $namespace, $args,
         [ $db->{'dsn'}, $db->{'user'}, $db->{'pass'} ],
