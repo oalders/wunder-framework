@@ -22,27 +22,26 @@ Provides a brand new invoice to the caller, with a new invoice number.
 
 sub new_invoice {
 
-    my $self        = shift;
-    my $client      = shift;
-    my $config      = $self->config;
-    my $number      = $client->create_related('invoice_number', {});
+    my $self   = shift;
+    my $client = shift;
+    my $config = $self->config;
+    my $number = $client->create_related( 'invoice_number', {} );
 
-    my $inv_conf    = $config->{'invoice'};
+    my $inv_conf = $config->{'invoice'};
 
     if ( $number->invoice_numberid < $inv_conf->{'start'} ) {
         $number->invoice_numberid( $inv_conf->{'start'} );
         $number->update;
     }
 
-    my $invoice_number = $inv_conf->{'prefix'} . zeropad(
+    my $invoice_number = $inv_conf->{'prefix'}
+        . zeropad(
         number => $number->invoice_numberid,
-        limit   => $inv_conf->{'pad_digits'},
-    );
+        limit  => $inv_conf->{'pad_digits'},
+        );
 
-    my $invoice = $client->create_related(
-         'invoice',
-         { number => $invoice_number }
-    );
+    my $invoice
+        = $client->create_related( 'invoice', { number => $invoice_number } );
 
     return $invoice;
 
@@ -61,10 +60,10 @@ sub get_pp {
 
     ## see Business::PayPal::API documentation for parameters
     my $pp = Business::PayPal::API->new(
-        Username   => $api->{'username'},
-        Password   => $api->{'password'},
-        Signature  => $api->{'signature'},
-        sandbox    => $api->{'sandbox'},
+        Username  => $api->{'username'},
+        Password  => $api->{'password'},
+        Signature => $api->{'signature'},
+        sandbox   => $api->{'sandbox'},
     );
 
     return $pp;
@@ -72,8 +71,8 @@ sub get_pp {
 
 =head2 update_paypal_txn
 
-Given a PayPal txn, update it in the transaction table.  "invoice" param requires
-invoiceid.
+Given a PayPal txn, update it in the transaction table. "invoice" param
+requires invoiceid.
 
 =cut
 
@@ -82,52 +81,51 @@ sub update_paypal_txn {
     my $self = shift;
 
     my %rules = (
-        auth_currency   => { type => SCALAR },
-        invoice         => { type => SCALAR },
-        txn_id          => { type => SCALAR },
+        auth_currency => { type => SCALAR },
+        invoice       => { type => SCALAR },
+        txn_id        => { type => SCALAR },
     );
 
-    my %args    = validate( @_, \%rules );
-    my $config  = $self->config;
+    my %args = validate( @_, \%rules );
+    my $config = $self->config;
 
-    my $api     = $config->{'payment_source'}->{'paypal'}->{'api'};
+    my $api = $config->{'payment_source'}->{'paypal'}->{'api'};
 
-    my $pp      = $self->get_pp;
-    my %txn     = $pp->GetTransactionDetails( TransactionID => $args{'txn_id'} );
+    my $pp = $self->get_pp;
+    my %txn = $pp->GetTransactionDetails( TransactionID => $args{'txn_id'} );
 
-    my $txn_dt  = DateTime::Format::ISO8601->parse_datetime( $txn{'PaymentDate'} );
-    $txn_dt->set_time_zone('America/Chicago' );
+    my $txn_dt
+        = DateTime::Format::ISO8601->parse_datetime( $txn{'PaymentDate'} );
+    $txn_dt->set_time_zone( 'America/Chicago' );
 
-    my $stamp_dt = DateTime::Format::ISO8601->parse_datetime( $txn{'Timestamp'} );
-    $stamp_dt->set_time_zone('America/Chicago' );
+    my $stamp_dt
+        = DateTime::Format::ISO8601->parse_datetime( $txn{'Timestamp'} );
+    $stamp_dt->set_time_zone( 'America/Chicago' );
 
-    my $invoice = $self->schema->resultset('Invoice')->find(
-        { invoiceid => $args{'invoice'} }
-    );
+    my $invoice = $self->schema->resultset( 'Invoice' )
+        ->find( { invoiceid => $args{'invoice'} } );
 
     my $attrs = {
-        date            => $stamp_dt,
-        installation    => $txn{'Receiver'},
-        company_name    => $txn{'PayerBusiness'},
-        name            => "$txn{'FirstName'} $txn{'LastName'}",
-        address         => $txn{'Street1'},
-        postal_code     => $txn{'PostalCode'},
-        country_code    => $txn{'Country'},
-        email           => $txn{'Payer'},
-        auth_amount     => $txn{'GrossAmount'},
-        auth_currency   => $args{'auth_currency'},
-        txn_time        => $txn_dt,
-        type            => $txn{'PaymentType'},
-        status          => $txn{'PaymentStatus'},
-        fee             => $txn{'FeeAmount'},
-        fee_currency    => $args{'auth_currency'},
-        source          => 'paypal',
+        date          => $stamp_dt,
+        installation  => $txn{'Receiver'},
+        company_name  => $txn{'PayerBusiness'},
+        name          => "$txn{'FirstName'} $txn{'LastName'}",
+        address       => $txn{'Street1'},
+        postal_code   => $txn{'PostalCode'},
+        country_code  => $txn{'Country'},
+        email         => $txn{'Payer'},
+        auth_amount   => $txn{'GrossAmount'},
+        auth_currency => $args{'auth_currency'},
+        txn_time      => $txn_dt,
+        type          => $txn{'PaymentType'},
+        status        => $txn{'PaymentStatus'},
+        fee           => $txn{'FeeAmount'},
+        fee_currency  => $args{'auth_currency'},
+        source        => 'paypal',
     };
 
-    my $txn = $invoice->find_or_create_related(
-        'transaction',
-        { txn_id => $args{'txn_id'} }
-    );
+    my $txn = $invoice->find_or_create_related( 'transaction',
+        { txn_id => $args{'txn_id'} } );
     $txn->update( $attrs );
 
     return $txn;
@@ -145,31 +143,31 @@ parent.location='new url"; window.close();
 
 sub paypal_return {
 
-    my $self        = shift;
-    my $config      = $self->config;
-    my $pp          = $self->get_pp;
-    my %details     = $pp->GetExpressCheckoutDetails( $self->query->param('token') );
+    my $self   = shift;
+    my $config = $self->config;
+    my $pp     = $self->get_pp;
+    my %details
+        = $pp->GetExpressCheckoutDetails( $self->query->param( 'token' ) );
 
-    my $invoice = $self->schema->resultset('Invoice')->find(
-        { number => $details{'InvoiceID'} }
-    );
+    my $invoice = $self->schema->resultset( 'Invoice' )
+        ->find( { number => $details{'InvoiceID'} } );
 
     return if !$invoice;
 
     ## now ask PayPal to xfer the money
     my %payinfo = $pp->DoExpressCheckoutPayment(
-        OrderTotal      => $invoice->amount,
-        PaymentAction   => 'Sale',
-        PayerID         => $details{PayerID},
-        Token           => $details{Token},
+        OrderTotal    => $invoice->amount,
+        PaymentAction => 'Sale',
+        PayerID       => $details{PayerID},
+        Token         => $details{Token},
     );
 
     if ( !exists $payinfo{'Errors'} ) {
 
-        my $txn = $self->update_paypal_txn (
-            auth_currency   => $config->{'base_currency'},
-            invoice         => $invoice->invoiceid,
-            txn_id          => $payinfo{'TransactionID'},
+        my $txn = $self->update_paypal_txn(
+            auth_currency => $config->{'base_currency'},
+            invoice       => $invoice->invoiceid,
+            txn_id        => $payinfo{'TransactionID'},
         );
 
         if ( $txn->status eq 'Completed' ) {
@@ -189,7 +187,7 @@ Assumes that the initial payment is due today and that the following payment
 must be moved to the 1st if it is not already scheduled for this date.
 
 IF $today < $rollover_day THEN bill prorated for this month.
-IF $today >= $rollover day THEN  bill prorated for this month + 1 additional
+IF $today >=$rollover day THEN bill prorated for this month + 1 additional
 month
 
 Returns
@@ -206,7 +204,7 @@ sub prorate {
 
     my %rules = (
         monthly_rate => { isa => 'Num', },
-        months       => { isa => 'Num',  },
+        months       => { isa => 'Num', },
         rollover_day => {
             isa      => 'Str',
             optional => 1,
@@ -237,7 +235,9 @@ sub prorate {
 
         ## bill for the extra days and set base for next payment to the first
         ## of next month
-        if ( $args{'months'} == 1 && $start_date->day > $args{'rollover_day'} ) {
+        if (   $args{'months'} == 1
+            && $start_date->day > $args{'rollover_day'} )
+        {
             $next_payment->add( months => 1 );
             $partial += 1;
         }
@@ -266,8 +266,6 @@ sub prorate {
 
 }
 
-
-
 =head1 AUTHOR
 
     Olaf Alders
@@ -278,10 +276,9 @@ sub prorate {
 
 =head1 COPYRIGHT
 
-This program is free software; you can redistribute
-it and/or modify it under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
-
 
 1;
