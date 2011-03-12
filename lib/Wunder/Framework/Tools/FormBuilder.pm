@@ -905,7 +905,7 @@ sub get_date_menu {
 
     push @elements, $q->popup_menu(
         -name => $name . '_year',
-        -values => [2006..$self->wf->dt->year + 5],
+        -values => [2006..($self->wf->dt->year + 5)],
         $readonly
     );
 
@@ -1010,6 +1010,38 @@ sub expiration_year {
         -values => [ $dt->year .. $dt->year + $years ],
         %args,
     );
+
+}
+
+=head2 ip2country( $ip )
+
+Returns appropriate country_code for an IP.  Defaults to REMOTE_ADDR, but you
+can override this by passing an IP address.
+
+=cut
+
+sub ip2country {
+
+    my $self = shift;
+    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $record = $self->wf->best_geo->record_by_addr( $ip );
+    return $record ? $record->country_code : undef; 
+
+}
+
+=head2 ip2region( $ip )
+
+Returns appropriate region_code for an IP.  Defaults to REMOTE_ADDR, but you
+can override this by passing an IP address.
+
+=cut
+
+sub ip2region {
+
+    my $self = shift;
+    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $record = $self->wf->best_geo->record_by_addr( $ip );
+    return $record ? $record->region : undef; 
 
 }
 

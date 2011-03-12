@@ -8,20 +8,36 @@ this script.
 
 =cut
 
-use DBIx::Class::Schema::Loader;
+use Data::Dump qw( dump );
+use DBIx::Class::Schema::Loader qw( make_schema_at );
 use Find::Lib '../lib/dev', '../lib';
+use Getopt::Long::Descriptive;
 use IO::Prompt;
 use Modern::Perl;
 
 use Wunder::Framework::Bundle;
 
+my ( $opt, $usage ) = describe_options(
+    'my-program %o <some-arg>',
+    [ 'all|a',        "display all schemas in config" ],
+    [ 'constraint=s', "table name regex" ],
+    [ 'debug',        "print debugging info" ],
+    [   'overwrite-modifications',
+        'overwrite modifications (helpful in case of checksum mismatch)'
+    ],
+    [],
+    [ 'help', "print usage message and exit" ],
+);
+
+print( $usage->text ), exit if $opt->help;
+
 my $base    = Wunder::Framework::Bundle->new();
 my $config  = $base->config;
 my @schemas = keys %{ $config->{'db'} };
 
-my @menu = ( );
+my @menu = ();
 foreach my $name ( @schemas ) {
-    push @menu, $name if $name =~ /write\z/;
+    push @menu, $name if ( $opt->all || $name =~ /write\z/ );
 }
 
 # backwards compatibility for older naming schemes
@@ -31,24 +47,36 @@ if ( scalar @menu == 0 ) {
     }
 }
 
-my $update_schema = prompt("Which schema would you like to update?", -m=> \@menu, -one_char);
+my $update_schema = prompt(
+    "Which schema would you like to update?",
+    -m => \@menu,
+    -one_char
+);
 
 print "You have chosen to update $update_schema\n";
-my $auth = prompt ( "Is this correct? (y/n) \n\n",  -onechar );
+my $auth = prompt( "Is this correct? (y/n) \n\n", -onechar );
+say '';
 
-if ($auth eq 'y') {
+if ( $auth eq 'y' ) {
 
-    my $db = $config->{'db'}->{$update_schema};
+    my $db        = $config->{'db'}->{$update_schema};
     my $namespace = $db->{'namespace'};
-    print "ok, updating $namespace\n";
-    eval "require $namespace";
+    say "ok, updating $namespace\n";
 
-    DBIx::Class::Schema::Loader->dump_to_dir( $base->path .'/lib' );
-    #$namespace->dump_to_dir( $base->path .'/lib');
-    $namespace->connection( $db->{'dsn'}, $db->{'user'}, $db->{'pass'} );
+    my $args = {
+        constraint => $opt->constraint || qr{.*},
+        debug => $opt->debug,
+        dump_directory          => $base->path . '/lib',
+        overwrite_modifications => $opt->overwrite_modifications || 0,
+    };
+
+    say "args: " . dump( $args ) if $opt->debug;
+
+    make_schema_at( $namespace, $args,
+        [ $db->{'dsn'}, $db->{'user'}, $db->{'pass'} ],
+    );
 
 }
-
 
 =head1 AUTHOR
 

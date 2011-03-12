@@ -17,7 +17,7 @@ Usage: perl install_deps.pl > install_required.sh
 use Wunder::Framework::Tools::Build::CPAN;
 
 my $cpan = Wunder::Framework::Tools::Build::CPAN->new;
-print "cpan " . join " ", $cpan->find_deps;
+print "cpanm " . join " ", $cpan->find_deps;
 
 =head1 AUTHOR
 
