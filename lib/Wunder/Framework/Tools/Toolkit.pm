@@ -27,7 +27,6 @@ make an OO module for this stuff.
 use DateTime;
 use Params::Validate qw( validate SCALAR );
 use String::Random;
-use Text::Iconv;
 
 =head2 dt_pad( @list )
 
@@ -125,22 +124,7 @@ sub moneypad {
         return round( $number, 0 );
     }
 
-    $number = round( $number );
-
-    # Find the decimal
-    my $dot = rindex($number, '.');
-
-    # Get the length of the Number
-    my $result = length($number) - $dot;
-
-    if ( $dot == -1 ) {
-        $number .= '.00';
-    }
-    elsif ( $result == 2) {
-        $number .= '0';
-    }
-
-    return $number;
+    return sprintf( "%.2f", round( $number ) );
 
 }
 
@@ -251,6 +235,8 @@ Provides an object to convert to UTF-8
 =cut
 
 sub converter {
+    require 'Text::Iconv';
+
     my $converter   = Text::Iconv->new( "ISO8859-1", "utf-8" );
     return $converter;
 }
