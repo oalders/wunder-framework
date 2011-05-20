@@ -269,6 +269,9 @@ sub build_form {
                         id      => $name,
                     });
                 }
+                elsif ( $args{'dwiw'} && any ('expiration_month', 'expiration_year') eq $name ) {
+                    $element =  $self->$name;
+                }                
                 else {
                     $element = $q->textfield(
                         -name => $name,
