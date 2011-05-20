@@ -15,13 +15,13 @@ use Wunder::Framework::Tools::Toolkit qw( converter dt_pad get_dt zeropad );
 use Carp;
 use CGI;
 use Data::Dump qw( dump );
+use Encode;
 use Locale::SubCountry;
 use Modern::Perl;
 use Params::Validate qw( validate validate_pos SCALAR ARRAYREF HASHREF );
 use Perl6::Junction qw( any );
 use Scalar::Util qw( reftype );
 use Text::Autoformat;
-use Text::Iconv;
 
 my %units_of = (
     datetime  => ['year', 'month', 'day', 'hour', 'minute', 'second'],
@@ -508,7 +508,6 @@ sub country_menu {
         %args    = validate( @args, \%rules );
     }
 
-    my $converter   = converter();
     my $world       = Locale::SubCountry::World->new();
     my %all_country_keyed_by_code = $world->code_full_name_hash;
 
@@ -523,7 +522,7 @@ sub country_menu {
 
     my $q = CGI->new;
 
-    return $converter->convert( $q->popup_menu(
+    return encode("utf8", $q->popup_menu(
         -values => \@codes,
         -labels => \%all_country_keyed_by_code,
         %args,
@@ -612,10 +611,7 @@ sub region_menu {
     $codes{''} = 'Select a State/Region';
     unshift @codes, '';
 
-    my $converter = Text::Iconv->new( "ISO8859-1", "utf-8" );
-
-    return $converter->convert(
-        $q->popup_menu(
+    return encode("utf8", $q->popup_menu(
             -name   =>  'region_code',
             -values =>  \@codes,
             -labels =>  \%codes,
