@@ -809,7 +809,7 @@ sub row_from_dbic {
     my $self = shift;
     my %rules = (
         dbic    => { isa => 'DBIx::Class' },
-        dbh     => { isa => 'DBI::db' },
+        dbh     => { isa => 'DBI::db', optional => 1 }, # deprecated
         table   => { type => SCALAR },
     );
 
@@ -817,7 +817,7 @@ sub row_from_dbic {
     my $dbic = $args{'dbic'};
 
     my $describe = $self->describe(
-        dbh     => $args{'dbh'},
+        dbh     => $dbic->storage->dbh,
         table   => $args{'table'}
     );
 
