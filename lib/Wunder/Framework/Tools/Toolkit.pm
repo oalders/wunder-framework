@@ -235,7 +235,7 @@ Provides an object to convert to UTF-8
 =cut
 
 sub converter {
-    require 'Text::Iconv';
+    require Text::Iconv;
 
     my $converter   = Text::Iconv->new( "ISO8859-1", "utf-8" );
     return $converter;
