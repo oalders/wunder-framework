@@ -1,10 +1,9 @@
 #!/usr/bin/perl
 
 use Modern::Perl;
+use Test::More;
+use Wunder::Framework::Tools::Toolkit;
 
-use Test::More tests => 14;
-
-require_ok( 'Wunder::Framework::Tools::Toolkit' );
 use Wunder::Framework::Tools::Toolkit
     qw( capitalize commify dt_pad get_dt suggest_password suggest_passwd zeropad moneypad round );
 
@@ -50,6 +49,8 @@ cmp_ok( $round, '==', 3.33, "round returns 3.33" );
 cmp_ok( moneypad( 0.5 ),   'eq', '0.50', moneypad( 0.5 ) );
 cmp_ok( moneypad( 0.50 ),  'eq', '0.50', moneypad( 0.50 ) );
 cmp_ok( moneypad( 0.500 ), 'eq', '0.50', moneypad( 0.500 ) );
+
+done_testing();
 
 =head1 AUTHOR
 
