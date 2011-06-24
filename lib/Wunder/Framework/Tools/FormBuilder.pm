@@ -611,7 +611,7 @@ sub region_menu {
     $codes{''} = 'Select a State/Region';
     unshift @codes, '';
 
-    return encode("utf8", $q->popup_menu(
+    return decode("utf8", $q->popup_menu(
             -name   =>  'region_code',
             -values =>  \@codes,
             -labels =>  \%codes,
