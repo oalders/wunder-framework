@@ -522,7 +522,7 @@ sub country_menu {
 
     my $q = CGI->new;
 
-    return encode("utf8", $q->popup_menu(
+    return decode("utf8", $q->popup_menu(
         -values => \@codes,
         -labels => \%all_country_keyed_by_code,
         %args,
