@@ -113,7 +113,9 @@ has 'fb' => (
 sub _build_fb {
 
     my $self = shift;
-    return Wunder::Framework::Tools::FormBuilder->new;
+    my $fb = Wunder::Framework::Tools::FormBuilder->new;
+    $fb->encode_this( 1 );
+    return $fb;
 
 }
 
