@@ -830,7 +830,7 @@ sub row_from_dbic {
     my $dbic = $args{'dbic'};
 
     my $describe = $self->describe(
-        dbh     => $dbic->storage->dbh,
+        dbh     => $args{dbh} || $dbic->storage->dbh,
         table   => $args{'table'}
     );
 
