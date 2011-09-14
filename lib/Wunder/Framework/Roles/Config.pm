@@ -3,6 +3,7 @@ package Wunder::Framework::Roles::Config;
 use Moose::Role;
 use Carp qw( croak );
 use Config::General;
+use Cwd;
 use Find::Lib;
 use Hash::Merge qw( merge );
 use Modern::Perl;
