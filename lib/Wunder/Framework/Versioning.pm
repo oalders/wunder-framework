@@ -92,8 +92,8 @@ CHANGE:
         my $backup_file = "$backup_dir/$file" . '_' . $self->dt->hms( '-' );
 
         $self->back_up( $db, $backup_file, 'upgrade' );
-        my $rc = $self->do_sql( $self->dbh( $schema_name ), $file ); # rc == 1  : successful application
-        $self->log_version( $self->dbh( $schema_name ), $file ) if $rc;
+        $self->do_sql( $self->dbh( $schema_name ), $file );
+        $self->log_version( $self->dbh( $schema_name ), $file );
 
     }
 
@@ -327,8 +327,6 @@ sub do_sql {
     my $dbh  = shift;
     my $file = shift;
 
-    my $rc = 1;
-
     local $dbh->{AutoCommit} = 0;
     local $dbh->{RaiseError} = 1;
 
@@ -357,11 +355,10 @@ sub do_sql {
         catch {
             warn "Transaction aborted because $_";
             $dbh->rollback;
-            $rc--;
         };
     }
 
-    return $rc;
+    return;
 
 }
 
