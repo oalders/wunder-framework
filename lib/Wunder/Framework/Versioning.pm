@@ -353,8 +353,8 @@ sub do_sql {
             $dbh->commit;
         }
         catch {
-            warn "Transaction aborted because $_";
             $dbh->rollback;
+            die "Transaction aborted because $_";
         };
     }
 
