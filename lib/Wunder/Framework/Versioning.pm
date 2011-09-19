@@ -22,6 +22,7 @@ use Data::Dump qw( dump );
 use File::Tools qw( mkpath );
 use IO::File;
 use Params::Validate qw( validate_pos HASHREF SCALAR );
+use Try::Tiny;
 
 =head2 fresh_install
 
@@ -326,26 +327,35 @@ sub do_sql {
     my $dbh  = shift;
     my $file = shift;
 
+    local $dbh->{AutoCommit} = 0;
+    local $dbh->{RaiseError} = 1;
+
     my $fh = IO::File->new( $file, "r" );
     if ( defined $fh ) {
 
-        my $sql = undef;
-        while ( $_ = $fh->getline ) {
-            $sql .= $_;
+        try {
+            my $sql = undef;
+            while ( $_ = $fh->getline ) {
+                $sql .= $_;
+            }
+            undef $fh;
+
+            my @queries = split /;/, $sql;
+
+            foreach my $query ( @queries ) {
+
+                next if $query !~ m{\w};
+
+                my $result = $dbh->do( $query );
+                print "ERROR $result : \n$query\n" if !$result;
+
+            }
+            $dbh->commit;
         }
-        undef $fh;
-
-        my @queries = split /;/, $sql;
-
-        foreach my $query ( @queries ) {
-
-            next if $query !~ m{\w};
-
-            my $result = $dbh->do( $query );
-            print "ERROR $result : \n$query\n" if !$result;
-
-        }
-
+        catch {
+            warn "Transaction aborted because $_";
+            $dbh->rollback;
+        };
     }
 
     return;
