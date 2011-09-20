@@ -2,9 +2,13 @@
 
 =head2 SYNOPSIS
 
-Use this script to add update DBIC schema table definitions.  Generally there will be 
+Use this script to add update DBIC schema table definitions.  Generally there will be
 a module in lib/dev/YourModule/Schema.pm which gives you some choices for running
 this script.
+
+=head2 USAGE
+
+perl wunder-tools/make_dbic_schema.pl  --constraint table_name --debug
 
 =cut
 
