@@ -35,6 +35,13 @@ my %menu_rules = (
     readonly    => { type => SCALAR, optional => 1, default => undef },
 );
 
+has 'ip' => (
+    is            => 'rw',
+    isa           => 'Str',
+    default       => $ENV{REMOTE_ADDR},
+    documentation => 'useful when run under Plack'
+);
+
 =head2 verbose( 0|1 )
 
 Enable verbose debugging output
@@ -546,12 +553,12 @@ sub get_user_country {
     my $country = $q->param('country');
 
     return $country if $country;
-    
-    my $record = $self->wf->best_geo->record_by_addr( $ENV{'REMOTE_ADDR'} );
+
+    my $record = $self->wf->best_geo->record_by_addr( $self->ip );
     return $record->country_code if $record;
-    
+
     if ( $self->verbose ) {
-        warn "no country param provided / ip $ENV{'REMOTE_ADDR'} not located";        
+        warn "no country param provided / ip " . $self->ip . " not located";
     }
 
     return;
@@ -1022,9 +1029,9 @@ can override this by passing an IP address.
 sub ip2country {
 
     my $self = shift;
-    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $ip = shift || $self->ip;
     my $record = $self->wf->best_geo->record_by_addr( $ip );
-    return $record ? $record->country_code : undef; 
+    return $record ? $record->country_code : undef;
 
 }
 
@@ -1038,9 +1045,9 @@ can override this by passing an IP address.
 sub ip2region {
 
     my $self = shift;
-    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $ip = shift || $self->ip;
     my $record = $self->wf->best_geo->record_by_addr( $ip );
-    return $record ? $record->region : undef; 
+    return $record ? $record->region : undef;
 
 }
 
