@@ -26,9 +26,11 @@ my ( $opt, $usage ) = describe_options(
     [ 'all|a',        "display all schemas in config" ],
     [ 'constraint=s', "table name regex" ],
     [ 'debug',        "print debugging info" ],
-    [   'overwrite-modifications',
+    [   'overwrite_modifications',
         'overwrite modifications (helpful in case of checksum mismatch)'
     ],
+    [ 'naming=s',       'v4|current', ],
+    [ 'use_namespaces', '1|0' ],
     [],
     [ 'help', "print usage message and exit" ],
 );
@@ -72,6 +74,8 @@ if ( $auth eq 'y' ) {
         debug => $opt->debug,
         dump_directory          => $base->path . '/lib',
         overwrite_modifications => $opt->overwrite_modifications || 0,
+        naming                  => $opt->naming || 'v4',
+        use_namespaces          => $opt->use_namespaces || 0,
     };
 
     say "args: " . dump( $args ) if $opt->debug;
