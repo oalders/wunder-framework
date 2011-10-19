@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use Modern::Perl;
 
@@ -14,8 +14,6 @@ foreach my $name ( keys %{ $test->config->{'db'} } ) {
 
     my $db = $test->config->{'db'}->{$name};
 
-    #diag dump $db;
-
 SKIP: {
         skip 'not every connection needs a namespace', 2
             if ( !exists $db->{'namespace'} );
@@ -29,6 +27,9 @@ SKIP: {
 }
 
 foreach my $name ( keys %{ $test->config->{'db'} } ) {
+
+    #diag( dump( $test->config->{db}->{$name} ) );
+    diag( "connecting to: $name" );
     isa_ok( $test->dbh( $name ), 'DBI::db', "got dbh for $name" );
 }
 
