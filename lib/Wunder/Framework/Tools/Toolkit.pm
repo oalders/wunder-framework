@@ -156,6 +156,7 @@ sub round {
     no warnings; ## no critic
     unless ( $p =~ /[0-9]/) { $p = 2 }
     use warnings;
+    $n = 1 if !$n;
     my $add = $n < 0 ? -.5 : .5;
     return int($n * 10**$p + $add) / 10**$p;
 
