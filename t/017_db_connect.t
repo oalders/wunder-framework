@@ -12,6 +12,7 @@ my @connections = reverse keys %{$base->config->{'db'}};
 #@connections = 'wundercounterlog_read';
 
 foreach my $conn ( @connections ) {
+    next if $conn eq 'slave';
 
     my $db  = $base->config->{'db'}->{$conn};
     my $dbh = $base->dbh( $conn );

@@ -22,6 +22,7 @@ use Data::Dump qw( dump );
 use File::Tools qw( mkpath );
 use IO::File;
 use Params::Validate qw( validate_pos HASHREF SCALAR );
+use Try::Tiny;
 
 =head2 fresh_install
 
@@ -51,54 +52,48 @@ sub upgrade {
     # versioning table installed?
     $self->check_versioning( $schema_name );
 
-    my $db  = $self->config->{'db'}->{$schema_name};
-    my $dt  = $self->dt;
-    my $backup_dir = $self->path . "/db/backup/pre_upgrade/$schema_name/" . $dt->ymd;
+    my $db = $self->config->{'db'}->{$schema_name};
+    my $dt = $self->dt;
+    my $backup_dir
+        = $self->path . "/db/backup/pre_upgrade/$schema_name/" . $dt->ymd;
 
-    $self->check_dir ( $backup_dir );
+    $self->check_dir( $backup_dir );
 
-    my $change_dir = $self->path . "/db/changes/$schema_name";
-    $self->check_dir( $change_dir );
+   # see http://perldoc.perl.org/functions/require.html to explain "eval" here
+    eval "require $db->{'namespace'}";    ## no critic
 
-    chdir $change_dir || croak "cannot chdir $!";
+    my $schema  = $self->schema( $schema_name );
+    my $changes = $self->get_change_files( $schema_name );
 
-    # see http://perldoc.perl.org/functions/require.html to explain "eval" here
-    eval "require $db->{'namespace'}"; ## no critic
-
-    my $schema = $self->schema( $schema_name );
-    my @changes = glob("*.sql");
-
-    CHANGE:
-    foreach my $file ( @changes ) {
+CHANGE:
+    foreach my $file ( @{$changes} ) {
 
         print "checking $file...\t";
 
-        # older files won't have the _ naming conventions for stuff dev files
-        # also ignore files from the same stream, as they are already installed
-        my $ignore      = '_' . $self->stream . '.sql';
+       # older files won't have the _ naming conventions for stuff dev files
+       # also ignore files from the same stream, as they are already installed
+        my $ignore = '_' . $self->stream . '.sql';
 
-        if (
-             ( $self->stream eq 'dev' && $file !~ m{_} )
-          || ( !$self->fresh_install && $file =~ m{$ignore}xms )
-            ) {
+        if (   ( $self->stream eq 'dev' && $file !~ m{_} )
+            || ( !$self->fresh_install && $file =~ m{$ignore}xms ) )
+        {
             print "belongs to this stream -- skipping\n";
             next CHANGE;
         }
 
-        my $install = $schema->resultset('Versioning')->find({
-            file => $file
-        });
+        my $install
+            = $schema->resultset( 'Versioning' )->find( { file => $file } );
 
         if ( $install ) {
             print "is already installed\n";
             next CHANGE;
         }
 
-        my $backup_file =  "$backup_dir/$file" . '_' . $self->dt->hms('-');
+        my $backup_file = "$backup_dir/$file" . '_' . $self->dt->hms( '-' );
 
-        $self->back_up      ( $db, $backup_file, 'upgrade' );
-        $self->do_sql       ( $self->dbh( $schema_name ), $file );
-        $self->log_version  ( $self->dbh( $schema_name ), $file );
+        $self->back_up( $db, $backup_file, 'upgrade' );
+        $self->do_sql( $self->dbh( $schema_name ), $file );
+        $self->log_version( $self->dbh( $schema_name ), $file );
 
     }
 
@@ -114,13 +109,13 @@ To be used in setup -- create a dir if it does not exist.
 
 sub check_dir {
 
-    my $self    = shift;
-    my $dir     = shift;
+    my $self = shift;
+    my $dir  = shift;
 
     die "no dir name" unless $dir;
 
     unless ( -e $dir ) {
-        mkpath( "$dir");
+        mkpath( "$dir" );
         die $! unless -e $dir;
     }
 
@@ -154,11 +149,11 @@ created)
 
 sub can_version {
 
-    my $self    = shift;
-    my $dbh     = shift;
-    my $tables  = $dbh->selectall_arrayref("SHOW TABLES LIKE 'versioning'");
+    my $self   = shift;
+    my $dbh    = shift;
+    my $tables = $dbh->selectall_arrayref( "SHOW TABLES LIKE 'versioning'" );
 
-    if ( scalar @{ $tables } > 0 ) {
+    if ( scalar @{$tables} > 0 ) {
         return 1;
     }
     else {
@@ -186,9 +181,9 @@ Marks a change file as "installed".
 
 sub log_version {
 
-    my $self    = shift;
-    my $dbh     = shift;
-    my $file    = shift;
+    my $self = shift;
+    my $dbh  = shift;
+    my $file = shift;
 
     my $insert = qq[
         INSERT INTO versioning
@@ -221,23 +216,27 @@ about all of your data in a snapshot in order for it to be effective.
 
 sub back_up {
 
-    my $self    = shift;
-    my @args    = validate_pos(
-        @_, { type => HASHREF }, { type => SCALAR }, { type => SCALAR },
+    my $self = shift;
+    my @args = validate_pos(
+        @_,
+        { type => HASHREF },
+        { type => SCALAR },
+        { type => SCALAR },
     );
 
-    my $db      = shift @args;
-    my $file    = shift @args;
-    my $action  = shift @args;
+    my $db     = shift @args;
+    my $file   = shift @args;
+    my $action = shift @args;
 
     # not every schema requires upgrades on backup
     return 0 if ( $action eq 'upgrade' && !exists $db->{'dump_on_upgrade'} );
 
     # but upgrade dumps do require some configuration
-    if ( $action eq 'upgrade'
-      && exists $db->{'dump_on_upgrade'}
-      && $db->{'dump_on_upgrade'}
-      && !exists $db->{'dump'}) {
+    if (   $action eq 'upgrade'
+        && exists $db->{'dump_on_upgrade'}
+        && $db->{'dump_on_upgrade'}
+        && !exists $db->{'dump'} )
+    {
         croak "set up your dump params";
     }
 
@@ -254,19 +253,21 @@ sub back_up {
 
         # check to ensure it's a valid schema
         $self->dbh( $from );
-        $cfg = $self->config->{'db'}->{ $from };
+        $cfg = $self->config->{'db'}->{$from};
     }
 
     my $dump = " mysqldump --skip-add-drop-table ";
-    $dump   .= " -u $cfg->{'user'} -p$cfg->{'pass'} ";
-    $dump   .= " -h $cfg->{'host'}  $db->{'database'} ";
+    $dump .= " -u $cfg->{'user'} -p$cfg->{'pass'} ";
+    $dump .= " -h $cfg->{'host'}  $db->{'database'} ";
 
     if ( $action eq 'upgrade'
-      && exists $db->{'dump'}->{'options'} ) {
+        && exists $db->{'dump'}->{'options'} )
+    {
         $dump .= " $db->{'dump'}->{'options'} ";
     }
     elsif ( $action eq 'snapshot'
-         && exists $db->{'dump'}->{'snapshot_options'} ) {
+        && exists $db->{'dump'}->{'snapshot_options'} )
+    {
         $dump .= " $db->{'dump'}->{'snapshot_options'} ";
     }
 
@@ -275,7 +276,7 @@ sub back_up {
     }
     $file .= '.sql';
 
-    $dump   .= " > $file ";
+    $dump .= " > $file ";
 
     print "backing up via: $dump\n";
 
@@ -300,18 +301,17 @@ sub snapshot {
     my @args        = validate_pos( @_, { type => SCALAR } );
     my $schema_name = shift @args;
 
-    die "bad schema name" if !exists $self->config->{'db'}->{ $schema_name };
+    die "bad schema name" if !exists $self->config->{'db'}->{$schema_name};
 
-    my $dt          = $self->dt;
-    my $backup_dir  = $self->path . "/db/backup/snapshot/$schema_name";
+    my $dt         = $self->dt;
+    my $backup_dir = $self->path . "/db/backup/snapshot/$schema_name";
 
     $self->check_dir( $backup_dir );
 
     my $file = $backup_dir . '/' . $dt->ymd . '_' . $dt->hms;
 
-    return $self->back_up(
-        $self->config->{'db'}->{ $schema_name }, $file, 'snapshot'
-    );
+    return $self->back_up( $self->config->{'db'}->{$schema_name},
+        $file, 'snapshot' );
 
 }
 
@@ -323,30 +323,39 @@ Run the SQL queries
 
 sub do_sql {
 
-    my $self    = shift;
-    my $dbh     = shift;
-    my $file    = shift;
+    my $self = shift;
+    my $dbh  = shift;
+    my $file = shift;
+
+    local $dbh->{AutoCommit} = 0;
+    local $dbh->{RaiseError} = 1;
 
     my $fh = IO::File->new( $file, "r" );
     if ( defined $fh ) {
 
-        my $sql = undef;
-        while ( $_ = $fh->getline ) {
-            $sql .= $_;
+        try {
+            my $sql = undef;
+            while ( $_ = $fh->getline ) {
+                $sql .= $_;
+            }
+            undef $fh;
+
+            my @queries = split /;/, $sql;
+
+            foreach my $query ( @queries ) {
+
+                next if $query !~ m{\w};
+
+                my $result = $dbh->do( $query );
+                print "ERROR $result : \n$query\n" if !$result;
+
+            }
+            $dbh->commit;
         }
-        undef $fh;
-
-        my @queries = split /;/, $sql;
-
-        foreach my $query ( @queries ) {
-
-            next if $query !~ m{\w};
-
-            my $result = $dbh->do($query);
-            print "ERROR $result : \n$query\n" if !$result;
-
-        }
-
+        catch {
+            $dbh->rollback;
+            die "Transaction aborted because $_";
+        };
     }
 
     return;
@@ -374,6 +383,28 @@ sub upgrade_all {
     return;
 
 }
+
+=head2 get_change_files
+
+Returns an ARRAYREF of file names with SQL change patches.
+
+=cut
+
+sub get_change_files {
+
+    my $self        = shift;
+    my $schema_name = shift;
+
+    my $change_dir = $self->path . "/db/changes/$schema_name";
+    $self->check_dir( $change_dir );
+
+    chdir $change_dir || croak "cannot chdir $!";
+
+    my @changes = glob( "*.sql" );
+    return \@changes;
+
+}
+
 
 =head1 AUTHOR
 
