@@ -35,6 +35,13 @@ my %menu_rules = (
     readonly    => { type => SCALAR, optional => 1, default => undef },
 );
 
+has 'ip' => (
+    is            => 'rw',
+    isa           => 'Str',
+    default       => $ENV{REMOTE_ADDR},
+    documentation => 'useful when run under Plack'
+);
+
 =head2 verbose( 0|1 )
 
 Enable verbose debugging output
@@ -46,6 +53,14 @@ has 'verbose' => (
     isa     => 'Int',
     default => 0,
 );
+
+has 'encode_this' => (
+    is            => 'rw',
+    isa           => 'Int',
+    default       => 0,
+    documentation => 'Enable if output is not utf8'
+);
+
 
 =head2 new()
 
@@ -271,7 +286,7 @@ sub build_form {
                 }
                 elsif ( $args{'dwiw'} && any ('expiration_month', 'expiration_year') eq $name ) {
                     $element =  $self->$name;
-                }                
+                }
                 else {
                     $element = $q->textfield(
                         -name => $name,
@@ -522,11 +537,14 @@ sub country_menu {
 
     my $q = CGI->new;
 
-    return encode("utf8", $q->popup_menu(
+    my $menu = $q->popup_menu(
         -values => \@codes,
         -labels => \%all_country_keyed_by_code,
         %args,
-    ) );
+    );
+
+    return encode( "utf8", $menu ) if ( $self->encode_this );
+    return decode( "utf8", $menu );
 
 }
 
@@ -546,12 +564,12 @@ sub get_user_country {
     my $country = $q->param('country');
 
     return $country if $country;
-    
-    my $record = $self->wf->best_geo->record_by_addr( $ENV{'REMOTE_ADDR'} );
+
+    my $record = $self->wf->best_geo->record_by_addr( $self->ip );
     return $record->country_code if $record;
-    
+
     if ( $self->verbose ) {
-        warn "no country param provided / ip $ENV{'REMOTE_ADDR'} not located";        
+        warn "no country param provided / ip " . $self->ip . " not located";
     }
 
     return;
@@ -611,14 +629,16 @@ sub region_menu {
     $codes{''} = 'Select a State/Region';
     unshift @codes, '';
 
-    return encode("utf8", $q->popup_menu(
-            -name   =>  'region_code',
-            -values =>  \@codes,
-            -labels =>  \%codes,
-            -id     =>  'region_code',
-            %{$args},
-        )
+    my $menu = $q->popup_menu(
+        -name   => 'region_code',
+        -values => \@codes,
+        -labels => \%codes,
+        -id     => 'region_code',
+        %{$args},
     );
+
+    return encode( "utf8", $menu ) if $self->encode_this;
+    return decode( "utf8", $menu );
 
 }
 
@@ -817,7 +837,7 @@ sub row_from_dbic {
     my $dbic = $args{'dbic'};
 
     my $describe = $self->describe(
-        dbh     => $dbic->storage->dbh,
+        dbh     => $args{dbh} || $dbic->storage->dbh,
         table   => $args{'table'}
     );
 
@@ -1022,9 +1042,9 @@ can override this by passing an IP address.
 sub ip2country {
 
     my $self = shift;
-    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $ip = shift || $self->ip;
     my $record = $self->wf->best_geo->record_by_addr( $ip );
-    return $record ? $record->country_code : undef; 
+    return $record ? $record->country_code : undef;
 
 }
 
@@ -1038,9 +1058,9 @@ can override this by passing an IP address.
 sub ip2region {
 
     my $self = shift;
-    my $ip = shift || $ENV{'REMOTE_ADDR'};
+    my $ip = shift || $self->ip;
     my $record = $self->wf->best_geo->record_by_addr( $ip );
-    return $record ? $record->region : undef; 
+    return $record ? $record->region : undef;
 
 }
 
