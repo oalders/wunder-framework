@@ -85,6 +85,9 @@ sub schema {
 
         my $db = $self->config->{'db'}->{$connection};
 
+        # remove need to "use" namespace first (especially in tests)
+        eval "require $db->{namespace}";
+
         $cache->{$connection} = $db->{'namespace'}
             ->connect( $db->{dsn}, $db->{user}, $db->{pass}, $db->{attrs} );
 
