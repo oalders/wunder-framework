@@ -59,8 +59,10 @@ sub upgrade {
 
     $self->check_dir( $backup_dir );
 
-   # see http://perldoc.perl.org/functions/require.html to explain "eval" here
+    # see http://perldoc.perl.org/functions/require.html to explain "eval" here
+    ## no critic (ProhibitStringyEval)
     eval "require $db->{'namespace'}";    ## no critic
+    ## use critic
 
     my $schema  = $self->schema( $schema_name );
     my $changes = $self->get_change_files( $schema_name );
