@@ -28,7 +28,7 @@ ok ( $builder->expiration_year, "got an expiration year menu" );
 ok ( $builder->region_menu('CA'), "creates region menu" );
 #diag( $builder->region_menu('CA') );
 
-$ENV{'REMOTE_ADDR'} = '64.37.82.100';
+$builder->ip('64.37.82.100');
 my $country = $builder->get_user_country();
 ok( $country, "gets user country: " . $country );
 #print $menu;
