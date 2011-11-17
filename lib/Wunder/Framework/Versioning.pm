@@ -97,6 +97,7 @@ CHANGE:
         $self->do_sql( $self->dbh( $schema_name ), $file );
         $self->log_version( $self->dbh( $schema_name ), $file );
 
+        say "----> successfully installed";
     }
 
     return 1;
