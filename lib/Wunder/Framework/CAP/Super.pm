@@ -177,38 +177,53 @@ sub load_tmpl {
     return $self->SUPER::load_tmpl( $tmpl_file, @extra_params );
 }
 
+sub get_env {
+
+    my $self = shift;
+    if ( $self->query->can('env') ) {
+        my $env = $self->query->env;
+        return %{ $env };
+    }
+    return %ENV;
+
+}
+
+sub is_plack {
+    my $self = shift;
+    return $self->query->can('env') ? 1 : 0;
+}
+
 sub _error_handler {
 
     my $self = shift;
 
+    my %env = $self->get_env;
     # don't send messages from testbed
-    if ( exists $ENV{'HARNESS_ACTIVE'} ) {
+    if ( exists $env{HARNESS_ACTIVE} ) {
         return;
     }
 
-    my $error_data = "http://$ENV{'SERVER_NAME'}$ENV{'REQUEST_URI'}\n\n";
+    my $server = $self->param('server_name') || $env{SERVER_NAME} || $env{HTTP_HOST};
+
+    my $error_data = "http://$server$env{REQUEST_URI}\n\n";
 
     if ( exists $self->config->{'admin_key'} ) {
         my $key = $self->config->{'admin_key'};
         $error_data
-            .= "http://$ENV{'SERVER_NAME'}$ENV{'REQUEST_URI'}&admin_key=$key\n\n";
+            .= "http://$server$env{REQUEST_URI}&admin_key=$key\n\n";
     }
 
     #$error_data .= $self->dump();
-    $error_data .= dump \%ENV;
+    $error_data .= dump \%env;
     $error_data .= dump( { $self->query->Vars } );
     $error_data .= "\n@_\n";
     $error_data .= "tmpl_path: " . dump( $self->tmpl_path );
-    #$error_data .= $@;
-    #$error_data .= $!;
 
     $self->logger( $error_data );
 
     if ( $self->param( 'username' ) ) {
         $error_data .= "username: " . $self->param( 'username' );
     }
-
-    my $server = $self->param( 'server_name' ) || $ENV{'SERVER_NAME'};
 
     my $msg = MIME::Lite->new(
         From    => 'olaf@wundersolutions.com',
