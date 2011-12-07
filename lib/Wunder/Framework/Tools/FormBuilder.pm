@@ -24,15 +24,15 @@ use Scalar::Util qw( reftype );
 use Text::Autoformat;
 
 my %units_of = (
-    datetime  => ['year', 'month', 'day', 'hour', 'minute', 'second'],
-    date      => ['year', 'month', 'day'],
-    time      => ['hour', 'minute', 'second'],
-    timestamp => ['year', 'month', 'day', 'hour', 'minute', 'second'],
+    datetime  => [ 'year', 'month',  'day', 'hour', 'minute', 'second' ],
+    date      => [ 'year', 'month',  'day' ],
+    time      => [ 'hour', 'minute', 'second' ],
+    timestamp => [ 'year', 'month',  'day', 'hour', 'minute', 'second' ],
 );
 
 my %menu_rules = (
-    name        => { type => SCALAR },
-    readonly    => { type => SCALAR, optional => 1, default => undef },
+    name     => { type => SCALAR },
+    readonly => { type => SCALAR, optional => 1, default => undef },
 );
 
 has 'ip' => (
@@ -40,6 +40,13 @@ has 'ip' => (
     isa           => 'Str',
     default       => $ENV{REMOTE_ADDR},
     documentation => 'useful when run under Plack'
+);
+
+has 'user_country' => (
+    is         => 'rw',
+    isa        => 'Str',
+    lazy_build => 1,
+    builder    => 'get_user_country'
 );
 
 =head2 verbose( 0|1 )
@@ -61,7 +68,6 @@ has 'encode_this' => (
     documentation => 'Enable if output is not utf8'
 );
 
-
 =head2 new()
 
 Create the new object;
@@ -71,8 +77,8 @@ Create the new object;
 sub new {
 
     my $class = shift;
-    my $self = {};
-    bless($self,$class);
+    my $self  = {};
+    bless( $self, $class );
 
     return $self;
 
@@ -89,14 +95,14 @@ sub describe {
     my $self = shift;
 
     my %rules = (
-        dbh         => { isa => 'DBI::db' },
-        return_as   => { type => SCALAR, optional => 1, default => 'ARRAYREF' },
-        table       => { type => SCALAR },
+        dbh       => { isa  => 'DBI::db' },
+        return_as => { type => SCALAR, optional => 1, default => 'ARRAYREF' },
+        table     => { type => SCALAR },
     );
 
-    my %return = ( );
-    my %args = validate( @_, \%rules );
-    my @table = ( );
+    my %return = ();
+    my %args   = validate( @_, \%rules );
+    my @table  = ();
 
     my $sth = $args{'dbh'}->prepare( " DESCRIBE `$args{'table'}` " );
     $sth->execute();
@@ -126,7 +132,7 @@ sub describe {
         }
 
         if ( $args{'return_as'} eq 'HASHREF' ) {
-            $return{$row{'field'}} = \%row;
+            $return{ $row{'field'} } = \%row;
         }
 
         push @table, \%row;
@@ -148,13 +154,13 @@ sub get_column_names {
     my $self = shift;
 
     my %rules = (
-        dbh         => { isa => 'DBI::db' },
-        table       => { type => SCALAR },
+        dbh   => { isa  => 'DBI::db' },
+        table => { type => SCALAR },
     );
 
-    my %args    = validate( @_, \%rules );
-    my $cols    = $self->describe( @_ );
-    my @names   = ( );
+    my %args  = validate( @_, \%rules );
+    my $cols  = $self->describe( @_ );
+    my @names = ();
 
     foreach my $col ( @{$cols} ) {
         push @names, $col->{'field'};
@@ -163,7 +169,6 @@ sub get_column_names {
     return \@names;
 
 }
-
 
 =head2 build_form( table => 'my_table', size => $integer )
 
@@ -174,7 +179,7 @@ Return an ARRAYREF that HTML::Template can turn into a form
 sub build_form {
 
     my $self = shift;
-    my $q = CGI->new();
+    my $q    = CGI->new();
 
     # don't want CGI params to override form defaults
     # we use FillInForm for that.  If we want CGI
@@ -182,38 +187,39 @@ sub build_form {
     $q->delete_all;
 
     my %rules = (
-        dbh             => { isa => 'DBI::db' },
-        dwiw            => { optional => 1, default => 0 },
-        dfv_errs        => { optional => 1, type => HASHREF,  },
-        hidden          => { optional => 1, type => ARRAYREF, },
-        ignore          => { optional => 1, type => ARRAYREF, },
-        names           => { optional => 1, type => HASHREF,  },
-        override        => { optional => 1, type => HASHREF,  },
-        password        => { optional => 1, type => ARRAYREF, default => [ ] },
-        push_hidden     => { optional => 1, type => ARRAYREF, },
-        preserve_case   => { optional => 1, default => 1 },
-        readonly        => { optional => 1, type => ARRAYREF, },
-        reftype         => { optional => 1, default => 'ARRAY', },
-        showonly        => { optional => 1, type => ARRAYREF, },
-        size            => { optional => 1, default => 30 },
-        table           => { type => SCALAR, },
+        dbh      => { isa      => 'DBI::db' },
+        dwiw     => { optional => 1, default => 0 },
+        dfv_errs => { optional => 1, type => HASHREF, },
+        hidden   => { optional => 1, type => ARRAYREF, },
+        ignore   => { optional => 1, type => ARRAYREF, },
+        names    => { optional => 1, type => HASHREF, },
+        override => { optional => 1, type => HASHREF, },
+        password => { optional => 1, type => ARRAYREF, default => [] },
+        push_hidden   => { optional => 1, type    => ARRAYREF, },
+        preserve_case => { optional => 1, default => 1 },
+        readonly      => { optional => 1, type    => ARRAYREF, },
+        reftype       => { optional => 1, default => 'ARRAY', },
+        showonly      => { optional => 1, type    => ARRAYREF, },
+        size          => { optional => 1, default => 30 },
+        table         => { type     => SCALAR, },
     );
 
     my %args = validate( @_, \%rules );
-    my $table = $self->describe( dbh => $args{'dbh'}, table => $args{'table'} );
+    my $table
+        = $self->describe( dbh => $args{'dbh'}, table => $args{'table'} );
 
-    my @elements    = ( );
-    my %elements    = ( );
+    my @elements = ();
+    my %elements = ();
 
-    my $hidden      = $self->array_to_hash( $args{'hidden'} );
-    my $ignore      = $self->array_to_hash( $args{'ignore'} );
-    my $names       = $args{'names'};
-    my $override    = $args{'override'};
-    my @password    = @{ $args{'password'} };
-    my $readonly    = $self->array_to_hash( $args{'readonly'} );
-    my $showonly    = $self->array_to_hash( $args{'showonly'} );
+    my $hidden   = $self->array_to_hash( $args{'hidden'} );
+    my $ignore   = $self->array_to_hash( $args{'ignore'} );
+    my $names    = $args{'names'};
+    my $override = $args{'override'};
+    my @password = @{ $args{'password'} };
+    my $readonly = $self->array_to_hash( $args{'readonly'} );
+    my $showonly = $self->array_to_hash( $args{'showonly'} );
 
-    foreach my $field_name ( @{$args{'push_hidden'} } ) {
+    foreach my $field_name ( @{ $args{'push_hidden'} } ) {
         unshift @{$table}, { field => $field_name };
         $hidden->{$field_name} = 1;
     }
@@ -221,16 +227,19 @@ sub build_form {
     foreach my $col ( @{$table} ) {
 
         my $element = undef;
-        my $name = $col->{'field'};
+        my $name    = $col->{'field'};
         $name =~ tr/[A-Z]/[a-z]/ if !$args{'preserve_case'};
 
         next if exists $ignore->{$name};
 
-        # hidden fields will always be allowed, even if visible fields are restricted
-        next if ( $args{'showonly'} && !exists $showonly->{$name} && !exists $hidden->{$name} );
+ # hidden fields will always be allowed, even if visible fields are restricted
+        next
+            if ( $args{'showonly'}
+            && !exists $showonly->{$name}
+            && !exists $hidden->{$name} );
 
         my $disable = 0;
-        $disable    = 1 if (exists $readonly->{$name} );
+        $disable = 1 if ( exists $readonly->{$name} );
 
         if ( exists $override->{$name} ) {
             $element = $override->{$name};
@@ -238,31 +247,31 @@ sub build_form {
 
         elsif ( $col->{'key'} eq 'PRI' || exists $hidden->{$name} ) {
 
-            $element = $q->hidden(
-                -name => $name,
-            );
+            $element = $q->hidden( -name => $name, );
 
             # needs to be set if it's a PRIMARY KEY
             $hidden->{$name} = 1;
         }
 
-        elsif ( $col->{'type'} =~ m{(?: \A int|char|varchar ) \( (\d+) \) }xms ) {
+        elsif (
+            $col->{'type'} =~ m{(?: \A int|char|varchar ) \( (\d+) \) }xms )
+        {
 
             if ( $disable ) {
 
                 $element = $q->textfield(
-                    -name => $name,
-                    -size => $args{'size'},
+                    -name      => $name,
+                    -size      => $args{'size'},
                     -maxlength => $1,
-                    -disabled => 1,
+                    -disabled  => 1,
                 );
             }
 
-            elsif ( any ( @password ) eq $name ) {
+            elsif ( any( @password ) eq $name ) {
 
                 $element = $q->password_field(
-                    -name => $name,
-                    -size => $args{'size'},
+                    -name      => $name,
+                    -size      => $args{'size'},
                     -maxlength => $1,
                 );
 
@@ -271,26 +280,36 @@ sub build_form {
             else {
 
                 if ( $args{'dwiw'} && $name eq 'country' ) {
-                    $element = $self->country_menu({
-                        name        => $name,
-                        id          => $name,
-                        onchange    => 'update_region()',
-                        default     => $self->get_user_country,
-                    });
+
+                    my %country = (
+                        name     => $name,
+                        id       => $name,
+                        onchange => 'update_region()',
+                    );
+
+                    if ( $self->user_country ) {
+                        $country{default} = $self->user_country;
+                    }
+                    $element = $self->country_menu( \%country );
                 }
+
                 elsif ( $args{'dwiw'} && $name eq 'region' ) {
-                    $element =  $self->region_menu( $self->get_user_country, {
-                        name    => $name,
-                        id      => $name,
-                    });
+                    $element = $self->region_menu(
+                        $self->user_country,
+                        {   name => $name,
+                            id   => $name,
+                        }
+                    );
                 }
-                elsif ( $args{'dwiw'} && any ('expiration_month', 'expiration_year') eq $name ) {
-                    $element =  $self->$name;
+                elsif ( $args{'dwiw'}
+                    && any( 'expiration_month', 'expiration_year' ) eq $name )
+                {
+                    $element = $self->$name;
                 }
                 else {
                     $element = $q->textfield(
-                        -name => $name,
-                        -size => $args{'size'},
+                        -name      => $name,
+                        -size      => $args{'size'},
                         -maxlength => $1,
                     );
                 }
@@ -298,7 +317,9 @@ sub build_form {
         }
 
         # this is a boolean field
-        elsif ( $col->{'type'} eq 'tinyint(1)' || $col->{'type'} eq 'binary(1)' ) {
+        elsif ($col->{'type'} eq 'tinyint(1)'
+            || $col->{'type'} eq 'binary(1)' )
+        {
 
             my @values = ( 0, 1 );
             my %labels = ( 0 => 'No', 1 => 'Yes' );
@@ -308,7 +329,7 @@ sub build_form {
             }
 
             $element = $q->popup_menu(
-                -name => $name,
+                -name   => $name,
                 -values => \@values,
                 -labels => \%labels,
             );
@@ -324,7 +345,7 @@ sub build_form {
             }
 
             $element = $q->popup_menu(
-                -name => $name,
+                -name   => $name,
                 -values => \@enum,
             );
 
@@ -338,62 +359,72 @@ sub build_form {
             if ( $disable ) {
 
                 $element = $q->textfield(
-                    -name => $name,
-                    -size => $size,
+                    -name      => $name,
+                    -size      => $size,
                     -maxlength => $size,
-                    -disabled => 1,
-                    -id       => $name,
+                    -disabled  => 1,
+                    -id        => $name,
                 );
             }
 
             else {
 
                 $element = $q->textfield(
-                    -name => $name,
-                    -size => $size,
+                    -name      => $name,
+                    -size      => $size,
                     -maxlength => $size,
-                    -id       => $name,
+                    -id        => $name,
                 );
 
             }
         }
 
-        elsif ( $col->{'type'} eq 'mediumtext' || $col->{'type'} eq 'text') {
+        elsif ( $col->{'type'} eq 'mediumtext' || $col->{'type'} eq 'text' ) {
 
             $element = $q->textarea(
-                -name       => $name,
-                -rows       => 10,
-                -columns    => $args{'size'},
-                -id         => $name,
+                -name    => $name,
+                -rows    => 10,
+                -columns => $args{'size'},
+                -id      => $name,
             );
 
         }
 
-        elsif ( $col->{'type'} =~ m{\A(blob|tinyblob|mediumblob|longblob)\z}) {
+        elsif ( $col->{'type'} =~ m{\A(blob|tinyblob|mediumblob|longblob)\z} )
+        {
 
             $element = $q->filefield(
-                -name       => $name,
-                -id         => $name,
+                -name => $name,
+                -id   => $name,
             );
 
         }
 
         elsif ( $col->{'type'} eq 'date' ) {
 
-            $element = $self->get_date_menu( name => $name, readonly => $disable  );
+            $element
+                = $self->get_date_menu( name => $name, readonly => $disable );
 
         }
 
-        elsif ( any ('datetime', 'timestamp') eq $col->{'type'} ) {
+        elsif ( any( 'datetime', 'timestamp' ) eq $col->{'type'} ) {
 
-            $element  = $self->get_date_menu( name => $name, readonly => $disable );
-            $element .= ' ' . $self->get_timestamp_menu( name => $name, readonly => $disable );
+            $element
+                = $self->get_date_menu( name => $name, readonly => $disable );
+            $element .= ' '
+                . $self->get_timestamp_menu(
+                name     => $name,
+                readonly => $disable
+                );
 
         }
 
         elsif ( $col->{'type'} eq 'time' ) {
 
-            $element = $self->get_timestamp_menu( name => $name, readonly => $disable );
+            $element = $self->get_timestamp_menu(
+                name     => $name,
+                readonly => $disable
+            );
 
         }
 
@@ -407,26 +438,27 @@ sub build_form {
         else {
             $name = $col->{'field'};
             $name =~ s{_}{ }gxms;
-            $name =~ s{([a-z])([A-Z])}{$1 $2}gxms; # CamelCase -> Camel Case
+            $name =~ s{([a-z])([A-Z])}{$1 $2}gxms;   # CamelCase -> Camel Case
             $name = autoformat $name, { case => 'title' };
             $name =~ s{\n}{}gxms;
         }
 
         my $dfv_error = undef;
-        my $dfv_col = 'err_' . $col_name;
-        if ( $args{'dfv_errs'} && exists $args{'dfv_errs'}->{ $dfv_col } ) {
-            $dfv_error = $args{'dfv_errs'}->{ $dfv_col };
+        my $dfv_col   = 'err_' . $col_name;
+        if ( $args{'dfv_errs'} && exists $args{'dfv_errs'}->{$dfv_col} ) {
+            $dfv_error = $args{'dfv_errs'}->{$dfv_col};
         }
 
-        push @elements, {
+        push @elements,
+            {
             column_name => $col_name,
             dfv_error   => $dfv_error,
             element     => $element,
             name        => $name,
             hidden      => $is_hidden,
-        };
+            };
 
-        $elements{$col->{'field'}} = $element if $element;
+        $elements{ $col->{'field'} } = $element if $element;
 
     }
 
@@ -447,10 +479,10 @@ Convert an ARRAYREF to a HASHREF
 
 sub array_to_hash {
 
-    my $self = shift;
+    my $self  = shift;
     my $array = shift;
 
-    my $hashref = { };
+    my $hashref = {};
 
     # it's ok to create an empty HASHREF
     return $hashref unless $array;
@@ -471,11 +503,13 @@ Returns a list of country codes sorted alphabetically by country *name*
 
 sub country_codes {
 
-    my $self = shift;
-    my $world = Locale::SubCountry::World->new();
+    my $self                      = shift;
+    my $world                     = Locale::SubCountry::World->new();
     my %all_country_keyed_by_code = $world->code_full_name_hash;
 
-    my @codes = sort { $all_country_keyed_by_code{$a} cmp $all_country_keyed_by_code{$b} } keys %all_country_keyed_by_code;
+    my @codes = sort {
+        $all_country_keyed_by_code{$a} cmp $all_country_keyed_by_code{$b}
+    } keys %all_country_keyed_by_code;
 
     return \@codes;
 
@@ -493,18 +527,18 @@ want the menu to default to any specific country.
 
 sub country_menu {
 
-    my $self    = shift;
+    my $self = shift;
 
-    my %args    = ( );
-    my %rules   = (
-        id     => { type => SCALAR, optional => 1, default => 'country_code' },
-        name   => { type => SCALAR, optional => 1, default => 'country_code' },
-        onchange    => { type => SCALAR, optional => 1 },
-        default     => { type => SCALAR, optional => 1 },
-        labels      => { type => SCALAR, optional => 1 },
-        nullable    => { type => SCALAR, optional => 1 },
-        values      => { type => SCALAR, optional => 1 },
-        disabled    => { type => SCALAR, optional => 1 },
+    my %args  = ();
+    my %rules = (
+        id   => { type => SCALAR, optional => 1, default => 'country_code' },
+        name => { type => SCALAR, optional => 1, default => 'country_code' },
+        onchange => { type => SCALAR, optional => 1 },
+        default  => { type => SCALAR, optional => 1 },
+        labels   => { type => SCALAR, optional => 1 },
+        nullable => { type => SCALAR, optional => 1 },
+        values   => { type => SCALAR, optional => 1 },
+        disabled => { type => SCALAR, optional => 1 },
     );
 
     # do this to keep from breaking API
@@ -519,11 +553,11 @@ sub country_menu {
         $arg_ref = $country;
     }
     if ( $arg_ref ) {
-        my @args = %{ $arg_ref };
-        %args    = validate( @args, \%rules );
+        my @args = %{$arg_ref};
+        %args = validate( @args, \%rules );
     }
 
-    my $world       = Locale::SubCountry::World->new();
+    my $world                     = Locale::SubCountry::World->new();
     my %all_country_keyed_by_code = $world->code_full_name_hash;
 
     my @codes = @{ $self->country_codes() };
@@ -561,7 +595,7 @@ sub get_user_country {
 
     my $self    = shift;
     my $q       = CGI->new;
-    my $country = $q->param('country');
+    my $country = $q->param( 'country' );
 
     return $country if $country;
 
@@ -585,36 +619,38 @@ on a supplied country code.
 
 sub region_menu {
 
-    my $self    = shift;
-    my $q       = CGI->new;
+    my $self = shift;
+    my $q    = CGI->new;
 
     my @args = validate_pos(
         @_,
-        { type => SCALAR,  optional => 1, default => $q->param('country') || undef },
+        {   type     => SCALAR,
+            optional => 1,
+            default  => $q->param( 'country' ) || undef
+        },
         { type => HASHREF, optional => 1, default => {} }
     );
 
-    my $country_code    = shift @args;
-    my $args            = shift @args;
+    my $country_code = shift @args;
+    my $args         = shift @args;
 
     if ( !$country_code ) {
         warn "no country code supplied to region menu";
         return;
     }
 
-
-    my $entity  = Locale::SubCountry->new( $country_code );
-    my %codes   = $entity->code_full_name_hash;
+    my $entity = Locale::SubCountry->new( $country_code );
+    my %codes  = $entity->code_full_name_hash;
 
     # the empty list is kind of funky, so allow for that for "FK" and
     # other countries where we don't have a region list
     if ( scalar keys %codes == 1 && exists $codes{''} ) {
 
         return $q->textfield(
-            -name       => 'region_code',
-            -size       => 20,
-            -maxlength  => 30,
-            -id         =>  'region_code',
+            -name      => 'region_code',
+            -size      => 20,
+            -maxlength => 30,
+            -id        => 'region_code',
             %{$args},
         );
 
@@ -651,20 +687,20 @@ defaults.
 
 sub ajax_region_menu {
 
-    my $self     = shift;
-    my $q        = CGI->new;
-    my $country  = $q->param('country');
+    my $self    = shift;
+    my $q       = CGI->new;
+    my $country = $q->param( 'country' );
 
     if ( !$country || length( $country ) != 2 ) {
         return "...";
     }
 
-    my $name = $q->param('name') || 'region';
+    my $name = $q->param( 'name' ) || 'region';
     $name =~ s{[^a-z_]}{}gxsm;
 
-    my $menu = $self->region_menu( $q->param('country'),
-        {
-            id      => $name,
+    my $menu = $self->region_menu(
+        $q->param( 'country' ),
+        {   id      => $name,
             name    => $name,
             default => $q->param( $name ),
         }
@@ -683,28 +719,27 @@ defaults.
 
 sub ajax_country_menu {
 
-    my $self = shift;
-    my $q    = CGI->new;
-    my $country = $self->get_user_country() || 'US';
+    my $self    = shift;
+    my $q       = CGI->new;
+    my $country = $self->user_country() || 'US';
 
-    my $name = $q->param('name') || 'country';
+    my $name = $q->param( 'name' ) || 'country';
     $name =~ s{[^a-z_]}{}gxsm;
-    
+
     my $attr = {
-        id          => $name,
-        name        => $name,
-        onchange    => 'update_region();',
-        default     => $q->param( $name ) || $country,
+        id       => $name,
+        name     => $name,
+        onchange => 'update_region();',
+        default  => $q->param( $name ) || $country,
     };
 
     my $menu = $self->country_menu( $country, $attr );
-    
+
     #$self->wf->logger( "country: " . dump $attr );
 
     return $menu;
 
 }
-
 
 =head2 dt_attrs( dt => $dt, name => 'field_name|column_name' )
 
@@ -715,16 +750,16 @@ to initialize a FormBuilder form.
 
 sub dt_attrs {
 
-    my $self = shift;
+    my $self  = shift;
     my %rules = (
-        dt => { isa => 'DateTime', optional => 1, default => get_dt() },
+        dt   => { isa  => 'DateTime', optional => 1, default => get_dt() },
         name => { type => SCALAR, }
     );
 
-    my %args = validate( @_, \%rules );
-    my $dt  = $args{'dt'};
-    my $name = $args{'name'};
-    my $dt_attrs = { };
+    my %args     = validate( @_, \%rules );
+    my $dt       = $args{'dt'};
+    my $name     = $args{'name'};
+    my $dt_attrs = {};
 
     my @methods = qw( year month day hour minute second );
 
@@ -745,20 +780,21 @@ the column names of a table.
 
 sub row_from_cgi {
 
-    my $self = shift;
+    my $self  = shift;
     my %rules = (
-        cgi     => { isa => 'CGI', optional => 1, default => CGI->new },
-        dbh     => { isa => 'DBI::db' },
+        cgi => { isa => 'CGI', optional => 1, default => CGI->new },
+        dbh => { isa => 'DBI::db' },
         preserve_case => { optional => 1, default => 1 },
-        table   => { type => SCALAR },
+        table         => { type     => SCALAR },
     );
 
     my %args = validate( @_, \%rules );
     my $query = $args{'cgi'};
 
-    my $describe = $self->describe( dbh => $args{'dbh'}, table => $args{'table'} );
+    my $describe
+        = $self->describe( dbh => $args{'dbh'}, table => $args{'table'} );
 
-    my %attrs = ( );
+    my %attrs = ();
 
     foreach my $col_ref ( @{$describe} ) {
         my $name = $col_ref->{'field'};
@@ -768,21 +804,23 @@ sub row_from_cgi {
 
         # if we check for definedness *first*, 0 values get missed and they're
         # important when updating tables
-        no warnings; ## no critic
+        no warnings;    ## no critic
         if ( $query->param( $name ) =~ /[a-zA-Z0-9]/ ) {
-        use warnings;
-            $attrs{$name} = $query->param($name);
+            use warnings;
+            $attrs{$name} = $query->param( $name );
         }
-        elsif ( $type eq 'datetime' ||
-                $type eq 'date'     ||
-                $type eq 'time' ) {
+        elsif ($type eq 'datetime'
+            || $type eq 'date'
+            || $type eq 'time' )
+        {
 
             my $update = 1;
-            my %time = ( );
+            my %time   = ();
 
             my @units = @{ $units_of{$type} };
 
             foreach my $unit ( @units ) {
+
                 # eg due_year
                 my $param = $name . '_' . $unit;
 
@@ -797,8 +835,10 @@ sub row_from_cgi {
                 }
             }
             if ( $update ) {
-                my $date = join "-", $time{'year'}, $time{'month'}, $time{'day'};
-                my $time = join ":", $time{'hour'}, $time{'minute'}, $time{'second'};
+                my $date = join "-", $time{'year'}, $time{'month'},
+                    $time{'day'};
+                my $time = join ":", $time{'hour'}, $time{'minute'},
+                    $time{'second'};
 
                 if ( $type eq 'datetime' ) {
                     $attrs{$name} = $date . ' ' . $time;
@@ -826,19 +866,19 @@ the column names of a table and the values from a DBIC object.
 
 sub row_from_dbic {
 
-    my $self = shift;
+    my $self  = shift;
     my %rules = (
-        dbic    => { isa => 'DBIx::Class' },
-        dbh     => { isa => 'DBI::db', optional => 1 }, # deprecated
-        table   => { type => SCALAR },
+        dbic  => { isa  => 'DBIx::Class' },
+        dbh   => { isa  => 'DBI::db', optional => 1 },    # deprecated
+        table => { type => SCALAR },
     );
 
     my %args = validate( @_, \%rules );
     my $dbic = $args{'dbic'};
 
     my $describe = $self->describe(
-        dbh     => $args{dbh} || $dbic->storage->dbh,
-        table   => $args{'table'}
+        dbh => $args{dbh} || $dbic->storage->dbh,
+        table => $args{'table'}
     );
 
     my %attrs = $dbic->get_columns;
@@ -848,19 +888,21 @@ sub row_from_dbic {
         my $name = $col_ref->{'field'};
         my $type = $col_ref->{'type'};
 
-        if ( $type eq 'datetime'  ||
-             $type eq 'timestamp' ||
-             $type eq 'date'      ||
-             $type eq 'time' ) {
+        if (   $type eq 'datetime'
+            || $type eq 'timestamp'
+            || $type eq 'date'
+            || $type eq 'time' )
+        {
 
             # if it's a NULL value, we don't worry about it
             next if !$dbic->$name;
             my @units = @{ $units_of{$type} };
 
             foreach my $unit ( @units ) {
+
                 # eg due_year
                 my $param = $name . '_' . $unit;
-                $attrs{ $param } = dt_pad( $dbic->$name->$unit );
+                $attrs{$param} = dt_pad( $dbic->$name->$unit );
 
             }
 
@@ -897,36 +939,39 @@ sub get_date_menu {
         '07' => 'Jul',
         '08' => 'Aug',
         '09' => 'Sep',
-        10 => 'Oct',
-        11 => 'Nov',
-        12 => 'Dec',
+        10   => 'Oct',
+        11   => 'Nov',
+        12   => 'Dec',
 
     };
 
-    my @elements = ( );
+    my @elements = ();
     my $readonly = undef;
     $readonly = "disabled => 1" if $args{'readonly'};
 
-    my @months = dt_pad(1..12);
-    push @elements, $q->popup_menu(
-        -name => $name . '_month',
+    my @months = dt_pad( 1 .. 12 );
+    push @elements,
+        $q->popup_menu(
+        -name   => $name . '_month',
         -values => \@months,
         -labels => $months,
         $readonly
-    );
+        );
 
-    my @days = dt_pad(1..31);
-    push @elements, $q->popup_menu(
-        -name => $name . '_day',
+    my @days = dt_pad( 1 .. 31 );
+    push @elements,
+        $q->popup_menu(
+        -name   => $name . '_day',
         -values => \@days,
         $readonly
-    );
+        );
 
-    push @elements, $q->popup_menu(
-        -name => $name . '_year',
-        -values => [2006..($self->wf->dt->year + 5)],
+    push @elements,
+        $q->popup_menu(
+        -name   => $name . '_year',
+        -values => [ 2006 .. ( $self->wf->dt->year + 5 ) ],
         $readonly
-    );
+        );
 
     return join " ", @elements;
 
@@ -944,34 +989,37 @@ sub get_timestamp_menu {
     my $self = shift;
     my %args = validate( @_, \%menu_rules );
 
-    my $name        = $args{'name'};
-    my $readonly    = undef;
-    $readonly       = "disabled => 1" if $args{'readonly'};
+    my $name     = $args{'name'};
+    my $readonly = undef;
+    $readonly = "disabled => 1" if $args{'readonly'};
 
     my $q = CGI->new;
 
-    my @elements = ( );
+    my @elements = ();
 
-    my @hours = dt_pad(0..23);
-    push @elements, $q->popup_menu(
-        -name => $name . '_hour',
+    my @hours = dt_pad( 0 .. 23 );
+    push @elements,
+        $q->popup_menu(
+        -name   => $name . '_hour',
         -values => \@hours,
         $readonly
-    );
+        );
 
-    my @minutes = dt_pad(0..59);
-    push @elements, $q->popup_menu(
-        -name => $name . '_minute',
+    my @minutes = dt_pad( 0 .. 59 );
+    push @elements,
+        $q->popup_menu(
+        -name   => $name . '_minute',
         -values => \@minutes,
         $readonly
-    );
+        );
 
-    my @seconds = dt_pad(0..59);
-    push @elements, $q->popup_menu(
-        -name => $name . '_second',
+    my @seconds = dt_pad( 0 .. 59 );
+    push @elements,
+        $q->popup_menu(
+        -name   => $name . '_second',
         -values => \@seconds,
         $readonly
-    );
+        );
 
     return join " ", @elements;
 
@@ -988,14 +1036,14 @@ sub expiration_month {
     my $self = shift;
     my %args = @_;
 
-    my @months = ( );
-    foreach my $month ( 1..12 ) {
+    my @months = ();
+    foreach my $month ( 1 .. 12 ) {
         push @months, zeropad( number => $month );
     }
 
     my $q = CGI->new;
     return $q->popup_menu(
-        -name => 'expiration_month',
+        -name   => 'expiration_month',
         -values => \@months,
         %args,
     );
@@ -1012,10 +1060,9 @@ with the current year.  Defaults to 10
 
 sub expiration_year {
 
-    my $self    = shift;
-    my %args    = validate(
-        @_, { years => { type => SCALAR, optional => 1, default => 10 } }
-    );
+    my $self = shift;
+    my %args = validate( @_,
+        { years => { type => SCALAR, optional => 1, default => 10 } } );
 
     my $years = delete $args{'years'};
 
@@ -1025,7 +1072,7 @@ sub expiration_year {
 
     my $q = CGI->new;
     return $q->popup_menu(
-        -name => 'expiration_year',
+        -name   => 'expiration_year',
         -values => [ $dt->year .. $dt->year + $years ],
         %args,
     );
@@ -1041,8 +1088,8 @@ can override this by passing an IP address.
 
 sub ip2country {
 
-    my $self = shift;
-    my $ip = shift || $self->ip;
+    my $self   = shift;
+    my $ip     = shift || $self->ip;
     my $record = $self->wf->best_geo->record_by_addr( $ip );
     return $record ? $record->country_code : undef;
 
@@ -1057,8 +1104,8 @@ can override this by passing an IP address.
 
 sub ip2region {
 
-    my $self = shift;
-    my $ip = shift || $self->ip;
+    my $self   = shift;
+    my $ip     = shift || $self->ip;
     my $record = $self->wf->best_geo->record_by_addr( $ip );
     return $record ? $record->region : undef;
 
@@ -1078,6 +1125,5 @@ This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
 =cut
-
 
 1;
