@@ -35,6 +35,13 @@ my %menu_rules = (
     readonly => { type => SCALAR, optional => 1, default => undef },
 );
 
+has 'encode_this' => (
+    is            => 'rw',
+    isa           => 'Int',
+    default       => 0,
+    documentation => 'Enable if output is not utf8'
+);
+
 has 'ip' => (
     is            => 'rw',
     isa           => 'Str',
@@ -44,28 +51,16 @@ has 'ip' => (
 
 has 'user_country' => (
     is         => 'rw',
-    isa        => 'Str',
+    isa        => 'Maybe[Str]',
     lazy_build => 1,
     builder    => 'get_user_country'
 );
-
-=head2 verbose( 0|1 )
-
-Enable verbose debugging output
-
-=cut
 
 has 'verbose' => (
     is      => 'rw',
     isa     => 'Int',
     default => 0,
-);
-
-has 'encode_this' => (
-    is            => 'rw',
-    isa           => 'Int',
-    default       => 0,
-    documentation => 'Enable if output is not utf8'
+    documentation => 'verbose debugging output'
 );
 
 =head2 new()
