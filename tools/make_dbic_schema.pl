@@ -31,6 +31,8 @@ my ( $opt, $usage ) = describe_options(
     ],
     [ 'naming=s',       'v4|current', ],
     [ 'use_namespaces', '1|0' ],
+    [ 'components=s', 'default Result components split by ,'],
+    [ 'moose', '1|0'],
     [],
     [ 'help', "print usage message and exit" ],
 );
@@ -76,7 +78,10 @@ if ( $auth eq 'y' ) {
         overwrite_modifications => $opt->overwrite_modifications || 0,
         naming                  => $opt->naming || 'v4',
         use_namespaces          => $opt->use_namespaces || 0,
+        use_moose               => $opt->moose || 0,
     };
+
+    $args->{components} = [ split /,/, $opt->components ] if $opt->components;
 
     say "args: " . dump( $args ) if $opt->debug;
 
