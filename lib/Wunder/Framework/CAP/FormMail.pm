@@ -59,12 +59,7 @@ sub send_mail {
 
     $sender = 'Web User' if $sender !~ m{\w}gxms;
 
-    # Create a multipart message (i.e., one with attachments):
-    my $html = $self->fill_form(
-        $self->template->fill( $config->{'template'} )
-    );
-
-    ### Create a new multipart message:
+   ### Create a new multipart message:
     my $msg = MIME::Lite->new(
         From    => "$sender <$sender_email>",
         To      => $config->{'To'},
@@ -86,14 +81,21 @@ sub send_mail {
 
     $msg->attach( $text_part );
 
-    ### Create a standalone part:
-    my $html_part = MIME::Lite->new(
-        Type => 'text/html',
-        Data => $$html,
-    );
+    unless ( $config->{text_only} ) {
 
-    $html_part->attr( 'content-type.charset' => 'UTF8' );
-    $msg->attach( $html_part );
+        my $html = $self->fill_form(
+            $self->template->fill( $config->{'template'} ) );
+
+        ### Create a standalone part:
+        my $html_part = MIME::Lite->new(
+            Type => 'text/html',
+            Data => $$html,
+        );
+
+        $html_part->attr( 'content-type.charset' => 'UTF8' );
+        $msg->attach( $html_part );
+
+    }
 
     # Is there a file upload to be attached?
     my @uploads = forcearray( $config->{'uploads'} );
