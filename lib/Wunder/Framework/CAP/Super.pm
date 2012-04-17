@@ -46,6 +46,15 @@ Set up some basic config variables.
 
 Returns a FormBuilder object
 
+=head2 get_env
+
+Returns the current %ENV. If we're running under Plack, the Plack env is
+returned.
+
+=head2 is_plack
+
+Returns true if this application is being run under Plack.
+
 =head2 load_tmpl
 
 Turns on caching and turns off param checking in *every* case.  I never

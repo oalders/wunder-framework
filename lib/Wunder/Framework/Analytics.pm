@@ -11,3 +11,9 @@ sub ip2host {
 }
 
 1;
+
+=head2 ip2host ( $ip )
+
+IP to hostname conversion
+
+=cut
