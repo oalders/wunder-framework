@@ -1,14 +1,17 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use Modern::Perl;
-use Data::Dumper;
-use Test::More tests => 2;
-
-require_ok('Wunder::Framework::Blogger');
+use Test::More;
+use Wunder::Framework::Blogger;
 
 my $blogger = Wunder::Framework::Blogger->new();
-isa_ok ($blogger, 'Wunder::Framework::Blogger' );
+isa_ok( $blogger, 'Wunder::Framework::Blogger' );
 
+my @headlines = $blogger->get_headlines(
+    'http://blog.wundercounter.com/feeds/posts/default' );
+ok( @headlines, "got headlines" );
+
+done_testing();
 
 =head1 AUTHOR
 

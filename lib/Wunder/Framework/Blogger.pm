@@ -4,6 +4,7 @@ use Moose;
 
 use Modern::Perl;
 use Carp qw( croak );
+use Data::Printer;
 use WWW::Mechanize;
 use XML::Simple;
 
@@ -15,22 +16,22 @@ feed.
 =cut
 
 sub get_headlines {
-    
+
     my $self = shift;
     my $feed_url = shift || croak "feed url missing";
-    
+
     my $mech = WWW::Mechanize->new;
     $mech->get( $feed_url );
-        
-    my $xs  = XML::Simple->new();
+
+    my $xs = XML::Simple->new();
     my $ref = $xs->XMLin( $mech->content, ForceArray => 1 );
-    
+    return if !$ref->{entry};
     my @posts = @{ $ref->{'entry'} };
     return if scalar @posts == 0;
 
-    my @loop = ( );
+    my @loop = ();
     foreach my $post ( @posts ) {
-        
+
         foreach my $link ( @{ $post->{'link'} } ) {
             if ( $link->{'rel'} eq 'alternate' ) {
                 push @loop, $link;
@@ -38,9 +39,9 @@ sub get_headlines {
             }
         }
     }
-    
+
     return \@loop;
-    
+
 }
 
 =head1 AUTHOR
@@ -57,6 +58,5 @@ This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
 =cut
-
 
 1;
