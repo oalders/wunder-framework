@@ -1,8 +1,8 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use Modern::Perl;
 use Data::Printer;
-use Test::More qw( no_plan );
+use Test::More;
 use Try::Tiny;
 
 require_ok('Wunder::Framework::Test::Roles::DBI');
@@ -26,7 +26,7 @@ foreach my $conn ( @connections ) {
 
     SKIP: {
 
-        skip 'not every connection needs a namespace ' . p $db, 2  unless ( exists $db->{'namespace'} );
+        skip 'not every connection needs a namespace ' . p($db), 2  unless ( exists $db->{'namespace'} );
 
         require_ok( $db->{'namespace'} );
         my $schema = $base->schema( $conn );
@@ -34,3 +34,5 @@ foreach my $conn ( @connections ) {
     }
 
 }
+
+done_testing();
