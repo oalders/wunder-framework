@@ -54,6 +54,8 @@ sub send_mail {
     }
 
     my $config  = $self->form_config;
+    die "config missing" if !$config;
+
     my $sender  = $q->param('first_name') . ' ' . $q->param('last_name');
     my $sender_email = $q->param('email') || $config->{'recipient_email'};
 
@@ -133,12 +135,8 @@ sub form_config {
 
     my $self    = shift;
     my $form_id = $self->query->param('form_id') || 'default';
-    my $config  = $self->config->{'form_mail'}->{ $form_id };
-    print "id: $form_id\n";
-
-    die "config missing" unless $config;
-
-    return $config;
+    return if !exists $self->config->{'form_mail'}->{ $form_id };
+    return $self->config->{'form_mail'}->{ $form_id };
 
 }
 
