@@ -11,6 +11,13 @@ use Data::Dumper;
 use MIME::Lite;
 use Perl6::Junction qw( any );
 
+has 'form_config' => (
+    is      => 'rw',
+    isa     => 'HashRef',
+    lazy    => 1,
+    builder => '_build_form_config',
+);
+
 =head2 setup
 
 This should be a small module.  Few run modes.  It's the OO version of the
@@ -85,8 +92,7 @@ sub send_mail {
 
     unless ( $config->{text_only} ) {
 
-        my $html = $self->fill_form(
-            $self->template->fill( $config->{'template'} ) );
+        my $html = $self->html_message;
 
         ### Create a standalone part:
         my $html_part = MIME::Lite->new(
@@ -120,18 +126,18 @@ sub send_mail {
     }
 
     $self->send_msg( $msg );
-
+    $self->on_success();
     return $self->redirect( $config->{'redirect'} );
 
 }
 
-=head2 form_config
+=head2 _build_form_config
 
 Shortcut to config for this particular form
 
 =cut
 
-sub form_config {
+sub _build_form_config {
 
     my $self    = shift;
     my $form_id = $self->query->param('form_id') || 'default';
@@ -191,6 +197,14 @@ sub text_message {
     return $text_message;
 }
 
+sub html_message {
+
+    my $self = shift;
+    return $self->fill_form(
+        $self->template->fill( $self->form_config->{'template'} ) );
+
+}
+
 =head2 required_ok
 
 Checks to see if required fields have been defined and exist
@@ -223,6 +237,15 @@ sub required_ok {
 
     return 1;
 
+}
+
+=head2 on_success
+
+Stub method which can be overridden by a subclass
+
+=cut
+
+sub on_success {
 }
 
 =head1 AUTHOR
