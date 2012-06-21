@@ -47,7 +47,10 @@ has 'stream' => (
 sub _build_stream {
 
     my $self = shift;
-    return $ENV{'CUSTOM_STREAM'} if exists $ENV{'CUSTOM_STREAM'};
+
+    foreach my $key ( 'CUSTOM_STREAM', 'WF_STREAM' ) {
+        return $ENV{ $key } if exists $ENV{ $key };
+    }
 
     if ( Find::Lib::base() =~ m{/home/co/(\w+)/}xsm ) {
         return $1;
@@ -60,7 +63,10 @@ sub _build_stream {
 sub _build_path {
 
     my $self = shift;
-    return $ENV{'CUSTOM_PATH'} if exists $ENV{'CUSTOM_PATH'};
+
+    foreach my $key ( 'CUSTOM_PATH', 'WF_PATH' ) {
+        return $ENV{ $key } if exists $ENV{ $key };
+    }
 
     my @dirs = split "/", Find::Lib::base();
 
