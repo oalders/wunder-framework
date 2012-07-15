@@ -13,7 +13,7 @@ use Perl6::Junction qw( any );
 
 has 'form_config' => (
     is      => 'rw',
-    isa     => 'HashRef',
+    isa     => 'Maybe[HashRef]',
     lazy    => 1,
     builder => '_build_form_config',
 );
