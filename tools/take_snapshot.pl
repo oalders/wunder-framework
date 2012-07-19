@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use Modern::Perl;
 use Data::Dump qw( dump );
@@ -22,11 +22,11 @@ my $config = $super->config->{'db'};
 my $schema_name = shift @ARGV;
 
 if ( !$schema_name ) {
-    print "Usage: perl dump_db.pl schema_name\n";
+    print "Usage: perl take_snapshot.pl schema_name\n";
     print "Your schema names are: \n";
 
     schema_names();
-    die;
+    exit;
 }
 
 if ( !exists $config->{ $schema_name } ) {
