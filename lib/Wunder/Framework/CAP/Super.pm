@@ -42,14 +42,14 @@ Add template directories to the tmpl_path param
 
 Set up some basic config variables.
 
+=head2 env
+
+Returns the current %ENV as a HashRef. If we're running under Plack, the Plack
+env is returned.
+
 =head2 fb
 
 Returns a FormBuilder object
-
-=head2 get_env
-
-Returns the current %ENV. If we're running under Plack, the Plack env is
-returned.
 
 =head2 is_plack
 
@@ -112,6 +112,12 @@ Enable this in your class by adding the following to setup()
 $self->error_mode( '_error_handler' );
 
 =cut
+
+has 'env' => (
+    is         => 'ro',
+    isa        => 'HashRef',
+    lazy_build => 1,
+);
 
 has 'fb' => (
     is         => 'ro',
@@ -186,15 +192,11 @@ sub load_tmpl {
     return $self->SUPER::load_tmpl( $tmpl_file, @extra_params );
 }
 
-sub get_env {
 
+sub _build_env {
     my $self = shift;
-    if ( $self->query->can('env') ) {
-        my $env = $self->query->env;
-        return %{ $env };
-    }
-    return %ENV;
-
+    return $self->query->env if ( $self->query->can( 'env' ) );
+    return \%ENV;
 }
 
 sub is_plack {
@@ -206,7 +208,7 @@ sub _error_handler {
 
     my $self = shift;
 
-    my %env = $self->get_env;
+    my %env = %{$self->env};
     # don't send messages from testbed
     if ( exists $env{HARNESS_ACTIVE} ) {
         return;
