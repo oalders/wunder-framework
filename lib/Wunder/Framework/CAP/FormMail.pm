@@ -197,6 +197,12 @@ sub text_message {
     return $text_message;
 }
 
+=head2 html_message
+
+Constructs HTML message body
+
+=cut
+
 sub html_message {
 
     my $self = shift;
