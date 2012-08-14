@@ -1,8 +1,8 @@
-package Wunder::Framework::Deploy;
+package Wunder::Framework::DBI;
 
 use Moose;
 
-with 'Wunder::Framework::Roles::Deployment';
+extends 'Wunder::Framework::Deployment';
 with 'Wunder::Framework::Roles::DBI';
 
 =head2 SYNOPIS
