@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 
 use Modern::Perl;
-use Data::Dump qw( dump );
 use Find::Lib '../lib';
 
 =head1 SYNOPSIS
@@ -16,7 +15,7 @@ Usage: perl dump_db.pl schema_name
 
 use Wunder::Framework::Versioning;
 
-my $super  = Wunder::Framework::Versioning->new();
+my $deploy  = Wunder::Framework::Deployment->new();
 my $config = $super->config->{'db'};
 
 my $schema_name = shift @ARGV;
@@ -33,7 +32,7 @@ if ( !exists $config->{ $schema_name } ) {
     print "Invalid schema name.\n";
 
     schema_names();
-    die;
+    exit;
 }
 
 $super->snapshot( $schema_name );
