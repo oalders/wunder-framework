@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use Modern::Perl;
 
@@ -10,7 +10,7 @@ We can't expect the paid library to be installed on every machine, so the
 =cut
 
 use Data::Dump qw( dump );
-use Test::More tests => 4;
+use Test::More;
 use Wunder::Framework::Test::Roles::Geo;
 
 my $test = Wunder::Framework::Test::Roles::Geo->new;
@@ -26,3 +26,6 @@ ok( $test->best_geo, "got the best geo object" );
 #isa_ok( $test->geo, 'Geo::IP' );
 isa_ok( $test->geo_lite, 'Geo::IP' );
 isa_ok( $test->best_geo, 'Geo::IP' );
+isa_ok( $test->geo_org, 'Geo::IP' );
+
+done_testing();

@@ -26,7 +26,6 @@ Returns an object using the best available Geo::IP City library
 
 has 'geo' => (
     is => 'ro',
-
     #isa        => 'Geo::IP',
     lazy_build => 1,
 );
@@ -37,33 +36,43 @@ has 'geo_lite' => (
     lazy_build => 1,
 );
 
+has 'geo_org' => (
+    is => 'ro',
+    #isa        => 'Geo::IP',
+    lazy_build => 1,
+);
+
+
 has 'best_geo' => (
     is         => 'ro',
     isa        => 'Geo::IP',
     lazy_build => 1,
 );
 
+my $geo_folder = '/usr/share/GeoIP';
+
 sub _build_geo {
 
     my $self = shift;
-
-    my $lib = '/usr/share/GeoIP/GeoIPCity.dat';
-    return if !-e $lib;
-
-    my $gi = Geo::IP->open( $lib, GEOIP_STANDARD );
-
-    return $gi;
+    return Geo::IP->open( $geo_folder . '/GeoIPCity.dat', GEOIP_STANDARD );
 
 }
 
 sub _build_geo_lite {
 
-    my $self = shift;
-    my $geo_lite
-        = Geo::IP->open( '/usr/share/GeoIP/GeoLiteCity.dat', GEOIP_STANDARD )
+    my $self     = shift;
+    my $geo_lite = Geo::IP->open( $geo_folder . '/GeoLiteCity.dat',
+        GEOIP_STANDARD )
         || croak $!;
 
     return $geo_lite;
+
+}
+
+sub _build_geo_org {
+
+    my $self = shift;
+    return Geo::IP->open( $geo_folder . '/GeoIPOrg.dat', GEOIP_STANDARD );
 
 }
 
