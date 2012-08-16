@@ -54,7 +54,11 @@ my $geo_folder = '/usr/share/GeoIP';
 sub _build_geo {
 
     my $self = shift;
-    return Geo::IP->open( $geo_folder . '/GeoIPCity.dat', GEOIP_STANDARD );
+    my $geo  = undef;
+    my $file = $geo_folder . '/GeoIPCity.dat';
+
+    return if !-e $file;
+    return Geo::IP->open( $file, GEOIP_STANDARD );
 
 }
 
