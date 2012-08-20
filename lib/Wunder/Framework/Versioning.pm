@@ -350,14 +350,14 @@ sub do_sql {
                 next if $query !~ m{\w};
 
                 my $result = $dbh->do( $query );
-                print "ERROR $result : \n$query\n" if !$result;
+                print "ERROR in $file -- $result : \n$query\n" if !$result;
 
             }
             $dbh->commit;
         }
         catch {
             $dbh->rollback;
-            die "Transaction aborted because $_";
+            die "Problem with $file. Transaction aborted because $_";
         };
     }
 
