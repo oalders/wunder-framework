@@ -138,7 +138,7 @@ sub cgiapp_init {
 
     my $self = shift;
 
-    $self->param( server_name => $ENV{'SERVER_NAME'} );
+    $self->param( server_name => $self->env->{HTTP_HOST} );
     $self->error_mode( '_error_handler' );
     $self->header_add( -charset => 'utf-8' );
 
