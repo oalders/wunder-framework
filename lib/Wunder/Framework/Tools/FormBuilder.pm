@@ -601,7 +601,7 @@ sub get_user_country {
         warn "no country param provided / ip " . $self->ip . " not located";
     }
 
-    return;
+    return 'US';
 
 }
 
