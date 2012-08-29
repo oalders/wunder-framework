@@ -10,6 +10,9 @@ use Devel::SimpleTrace;
 use DBI;
 use File::Slurp qw( read_file );
 use Hash::Merge;
+use Find::Lib;
+use Hash::Merge;
+use Modern::Perl;
 
 has _db_config => (
     is      => 'ro',
@@ -123,6 +126,18 @@ sub dbh {
             ## no critic (ProhibitStringyEval)
             eval "require $db->{namespace}";
             ## use critic
+
+            $cache->{$connection} = $db->{'namespace'}->connect(
+                $db->{dsn},
+                $db->{user},
+                $db->{pass},
+                merge(
+                    {   quote_char => '"',
+                        name_sep   => '.'
+                    },
+                    $db->{attrs}
+                )
+            );
 
             $cache->{$schema_handle}
                 = $db->{'namespace'}
