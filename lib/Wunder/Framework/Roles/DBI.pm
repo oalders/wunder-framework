@@ -139,6 +139,18 @@ sub dbh {
                 )
             );
 
+            $cache->{$connection} = $db->{'namespace'}->connect(
+                $db->{dsn},
+                $db->{user},
+                $db->{pass},
+                merge(
+                    {   quote_char => '"',
+                        name_sep   => '.'
+                    },
+                    $db->{attrs}
+                )
+            );
+
             $cache->{$schema_handle}
                 = $db->{'namespace'}
                 ->connect( $db->{dsn}, $db->{user}, $db->{pass},
