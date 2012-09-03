@@ -11,6 +11,13 @@ use Data::Dumper;
 use MIME::Lite;
 use Perl6::Junction qw( any );
 
+has 'email_from' => (
+    is      => 'rw',
+    isa     => 'Str',
+    lazy    => 1,
+    builder => '_build_email_from',
+);
+
 has 'form_config' => (
     is      => 'rw',
     isa     => 'Maybe[HashRef]',
@@ -63,14 +70,9 @@ sub send_mail {
     my $config  = $self->form_config;
     die "config missing" if !$config;
 
-    my $sender  = $q->param('first_name') . ' ' . $q->param('last_name');
-    my $sender_email = $q->param('email') || $config->{'recipient_email'};
-
-    $sender = 'Web User' if $sender !~ m{\w}gxms;
-
    ### Create a new multipart message:
     my $msg = MIME::Lite->new(
-        From    => "$sender <$sender_email>",
+        From    => $self->email_from,
         To      => $config->{'To'},
         Subject => $config->{'Subject'},
         Type    =>'multipart/alternative'
@@ -143,6 +145,21 @@ sub _build_form_config {
     my $form_id = $self->query->param('form_id') || 'default';
     return if !exists $self->config->{'form_mail'}->{ $form_id };
     return $self->config->{'form_mail'}->{ $form_id };
+
+}
+
+
+sub _build_email_from {
+
+    my $self   = shift;
+    my $q      = $self->query;
+    my $sender = $q->param( 'first_name' ) . ' ' . $q->param( 'last_name' );
+    my $sender_email = $q->param( 'email' )
+        || $self->form_config->{'recipient_email'};
+
+    $sender = 'Web User' if $sender !~ m{\w}gxms;
+
+    return "$sender <$sender_email>";
 
 }
 
