@@ -15,8 +15,8 @@ Usage: perl dump_db.pl schema_name
 
 use Wunder::Framework::Versioning;
 
-my $deploy  = Wunder::Framework::Deployment->new();
-my $config = $super->config->{'db'};
+my $versioning  = Wunder::Framework::Versioning->new();
+my $config = $versioning->config->{'db'};
 
 my $schema_name = shift @ARGV;
 
@@ -35,7 +35,7 @@ if ( !exists $config->{ $schema_name } ) {
     exit;
 }
 
-$super->snapshot( $schema_name );
+$versioning->snapshot( $schema_name );
 
 
 
