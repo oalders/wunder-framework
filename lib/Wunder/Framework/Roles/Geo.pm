@@ -2,7 +2,6 @@ package Wunder::Framework::Roles::Geo;
 
 use Moose::Role;
 use Carp qw( croak );
-use Data::Dump qw( dump );
 use Geo::IP;
 
 =head1 SYNOPSIS

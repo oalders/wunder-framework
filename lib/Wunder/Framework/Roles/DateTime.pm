@@ -4,7 +4,6 @@ use Moose::Role;
 
 #requires 'config';
 
-use Data::Dump qw( dump );
 use DateTime;
 use DateTime::Format::MySQL;
 use Devel::SimpleTrace;

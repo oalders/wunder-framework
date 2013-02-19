@@ -6,7 +6,6 @@ use Moose::Role;
 #requires 'dt';
 
 use Modern::Perl;
-use Data::Dump qw( dump );
 use DateTime::Format::Mail;
 use MIME::Lite;
 use Params::Validate qw( validate SCALAR );

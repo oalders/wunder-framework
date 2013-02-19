@@ -1,7 +1,6 @@
 package Wunder::Framework::Roles::MySQL;
 
 use Moose::Role;
-use Data::Dump qw( dump );
 use Wunder::Framework::Tools::Toolkit qw( forcearray );
 
 =head1 SYNOPSIS
