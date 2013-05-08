@@ -2,7 +2,6 @@ package Wunder::Framework::Image;
 
 use Moose;
 
-use Graphics::Magick;
 use Modern::Perl;
 use Params::Validate qw( SCALAR SCALARREF validate validate_pos );
 use Perl6::Junction qw( any );
@@ -70,6 +69,7 @@ sub _build_info {
 
 sub _build_magick {
     my $self   = shift;
+    require Graphics::Magick;
     my $magick = Graphics::Magick->new;
     my $status = $magick->Read( $self->file );
     die "problem reading file: $status" if $status;
