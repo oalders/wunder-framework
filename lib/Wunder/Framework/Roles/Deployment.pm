@@ -48,7 +48,7 @@ sub _build_stream {
 
     my $self = shift;
 
-    foreach my $key ( 'CUSTOM_STREAM', 'WF_STREAM' ) {
+    foreach my $key ( 'WF_STREAM', 'CUSTOM_STREAM' ) {
         return $ENV{ $key } if exists $ENV{ $key };
     }
 
@@ -63,8 +63,7 @@ sub _build_stream {
 sub _build_path {
 
     my $self = shift;
-
-    foreach my $key ( 'CUSTOM_PATH', 'WF_PATH' ) {
+    foreach my $key ( 'WF_PATH', 'CUSTOM_PATH' ) {
         return $ENV{ $key } if exists $ENV{ $key };
     }
 
