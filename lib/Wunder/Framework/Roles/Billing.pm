@@ -14,7 +14,6 @@ has pp => (
     lazy_build => 1,
 );
 
-
 sub _build_pp {
 
     my $self = shift;
@@ -58,7 +57,6 @@ sub new_invoice {
 
 }
 
-
 sub update_paypal_txn {
 
     my $self = shift;
@@ -69,9 +67,9 @@ sub update_paypal_txn {
         txn_id        => { type => SCALAR },
     );
 
-    my %args = validate( @_, \%rules );
+    my %args   = validate( @_, \%rules );
     my $config = $self->config;
-    my $tz = $config->{time_zone};
+    my $tz     = $config->{time_zone};
 
     my $api = $config->{'payment_source'}->{'paypal'}->{'api'};
 

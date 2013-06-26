@@ -12,7 +12,7 @@ Print out full config for this stream.
 =cut
 
 my $wf = Wunder::Framework::Bundle->new;
-print p $wf->config; # STDOUT
+print p $wf->config;    # STDOUT
 
 =head1 AUTHOR
 

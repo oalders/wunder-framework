@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 
 use Modern::Perl;
-use Test::More skip_all => "have to find a way to deal with schema in examples";
+use Test::More skip_all =>
+    "have to find a way to deal with schema in examples";
 
-require_ok('Wunder::Framework::Client');
+require_ok( 'Wunder::Framework::Client' );
 
 my $client = Wunder::Framework::Client->new();
-isa_ok ($client, 'Wunder::Framework::Client' );
+isa_ok( $client, 'Wunder::Framework::Client' );
 
 =head1 AUTHOR
 

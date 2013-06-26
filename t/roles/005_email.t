@@ -11,5 +11,9 @@ my $test = Wunder::Framework::Test::Roles::Email->new;
 
 SKIP: {
     skip "config required for mail_admin", 1, if !$test->config->{'contact'};
-    ok( $test->mail_admin( subject => 'framework test', data => 'looks good') );
+    ok( $test->mail_admin(
+            subject => 'framework test',
+            data    => 'looks good'
+        )
+    );
 }

@@ -20,21 +20,22 @@ SKIP: {
 
     my $conf = $wf->config->{google}->{maps};
 
-    skip "Prereqs missing", 5 
+    skip "Prereqs missing", 5
         unless ( exists $conf->{table} && $conf->{api_key} );
-        
-        require_ok( $wf->config->{db}->{ $conf->{schema} }->{'namespace'} );
+
+    require_ok( $wf->config->{db}->{ $conf->{schema} }->{'namespace'} );
     my $coder = Wunder::Framework::Test::Roles::GeoCode->new(
         dbic => $wf->schema->resultset( 'GeoCode' ) );
 
     ok( $coder->api_key, "got an api key: " . $coder->api_key );
-    
+
     my $point = $coder->geo_code( country => 'CA' );
     ok( $point, "got a point back for CA" );
-    cmp_ok( $point->latitude, '==', 36.778261, "correct latitude" );
+    cmp_ok( $point->latitude,  '==', 36.778261,    "correct latitude" );
     cmp_ok( $point->longitude, '==', -119.4179324, "correct longitude" );
-    
+
     my %cols = $point->get_columns;
+
     #diag( dump \%cols );
 
 }

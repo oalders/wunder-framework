@@ -25,7 +25,8 @@ use Data::Dump qw( dump );
 use Params::Validate qw( validate validate_pos SCALAR );
 
 use Wunder::Framework::Tools::FormBuilder;
-use Wunder::Framework::Tools::Toolkit qw( commify converter get_dt round moneypad );
+use Wunder::Framework::Tools::Toolkit
+    qw( commify converter get_dt round moneypad );
 
 =head2 SYNOPSIS
 
@@ -128,7 +129,7 @@ has 'fb' => (
 sub _build_fb {
 
     my $self = shift;
-    my $fb = Wunder::Framework::Tools::FormBuilder->new;
+    my $fb   = Wunder::Framework::Tools::FormBuilder->new;
     $fb->encode_this( 1 );
     return $fb;
 
@@ -163,7 +164,6 @@ sub cgiapp_init {
 
 }
 
-
 sub template_config {
 
     my $self = shift;
@@ -179,7 +179,6 @@ sub template_config {
         },
     };
 
-
 }
 
 sub load_tmpl {
@@ -192,7 +191,6 @@ sub load_tmpl {
     return $self->SUPER::load_tmpl( $tmpl_file, @extra_params );
 }
 
-
 sub _build_env {
     my $self = shift;
     return $self->query->env if ( $self->query->can( 'env' ) );
@@ -201,27 +199,30 @@ sub _build_env {
 
 sub is_plack {
     my $self = shift;
-    return $self->query->can('env') ? 1 : 0;
+    return $self->query->can( 'env' ) ? 1 : 0;
 }
 
 sub _error_handler {
 
     my $self = shift;
 
-    my %env = %{$self->env};
+    my %env = %{ $self->env };
+
     # don't send messages from testbed
     if ( exists $env{HARNESS_ACTIVE} ) {
         return;
     }
 
-    my $server = $self->param('server_name') || $env{SERVER_NAME} || $env{HTTP_HOST};
+    my $server
+        = $self->param( 'server_name' )
+        || $env{SERVER_NAME}
+        || $env{HTTP_HOST};
 
     my $error_data = "http://$server$env{REQUEST_URI}\n\n";
 
     if ( exists $self->config->{'admin_key'} ) {
         my $key = $self->config->{'admin_key'};
-        $error_data
-            .= "http://$server$env{REQUEST_URI}&admin_key=$key\n\n";
+        $error_data .= "http://$server$env{REQUEST_URI}&admin_key=$key\n\n";
     }
 
     #$error_data .= $self->dump();
@@ -324,8 +325,8 @@ sub tt_filters {
             return $dt->hms;
         },
 
-        int   => sub { return int( shift ) },
-        round => sub { return round( shift ) },
+        int      => sub { return int( shift ) },
+        round    => sub { return round( shift ) },
         moneypad => sub { return moneypad( shift ) },
 
         nbsp => sub {

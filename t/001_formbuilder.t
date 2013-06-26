@@ -6,33 +6,36 @@ use Data::Dumper;
 use Scalar::Util qw( reftype );
 use Test::More tests => 8;
 
-require_ok('Wunder::Framework::Tools::FormBuilder');
+require_ok( 'Wunder::Framework::Tools::FormBuilder' );
 
 my $builder = Wunder::Framework::Tools::FormBuilder->new();
-isa_ok ($builder, 'Wunder::Framework::Tools::FormBuilder' );
+isa_ok( $builder, 'Wunder::Framework::Tools::FormBuilder' );
 
-my $date_menu = $builder->get_date_menu( name => "date");
-ok ($date_menu, "returned date menu");
+my $date_menu = $builder->get_date_menu( name => "date" );
+ok( $date_menu, "returned date menu" );
 
 #print $date_menu;
 
-my $menu = $builder->get_timestamp_menu( name => "time");
-ok ($menu, "returned timestamp menu");
+my $menu = $builder->get_timestamp_menu( name => "time" );
+ok( $menu, "returned timestamp menu" );
 
-ok ( $builder->expiration_month, "got an expiration month menu" );
+ok( $builder->expiration_month, "got an expiration month menu" );
+
 #diag ( $builder->expiration_month );
 
-ok ( $builder->expiration_year, "got an expiration year menu" );
+ok( $builder->expiration_year, "got an expiration year menu" );
+
 #diag ( $builder->expiration_year );
 
-ok ( $builder->region_menu('CA'), "creates region menu" );
+ok( $builder->region_menu( 'CA' ), "creates region menu" );
+
 #diag( $builder->region_menu('CA') );
 
-$builder->ip('64.37.82.100');
+$builder->ip( '64.37.82.100' );
 my $country = $builder->get_user_country();
 ok( $country, "gets user country: " . $country );
-#print $menu;
 
+#print $menu;
 
 =head1 AUTHOR
 

@@ -54,7 +54,7 @@ sub dt {
 
 sub mysql_datetime {
     my ( $self, $dt ) = @_;
-    return if !$dt; # undef is ok, especially if we are inflating DBIC cols
+    return if !$dt;    # undef is ok, especially if we are inflating DBIC cols
     return DateTime::Format::MySQL->format_datetime( $dt );
 }
 

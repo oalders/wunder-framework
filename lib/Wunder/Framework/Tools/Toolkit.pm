@@ -40,7 +40,7 @@ sub dt_pad {
 
     my @digits = @_;
     foreach ( @digits ) {
-        if ( $_ < 10 && length($_) == 1 ) {
+        if ( $_ < 10 && length( $_ ) == 1 ) {
             $_ = '0' . $_;
         }
     }
@@ -62,8 +62,8 @@ Returns a nicely zeropadded number for creating invoice numbers etc.
 sub zeropad {
 
     my %rules = (
-        number  => { type => SCALAR, },
-        limit   => { optional => 1, default => 2, type => SCALAR, }
+        number => { type     => SCALAR, },
+        limit  => { optional => 1, default => 2, type => SCALAR, }
     );
 
     my %args = validate( @_, \%rules );
@@ -71,7 +71,7 @@ sub zeropad {
 
     my $padding = $args{'limit'} - length( $number );
     if ( $padding > 0 ) {
-        $number = "0"x$padding . $number;
+        $number = "0" x $padding . $number;
     }
 
     return $number;
@@ -86,9 +86,7 @@ Return an initialized DateTime object, set to the present time.
 
 sub get_dt {
 
-    my %rules = (
-        epoch => { optional => 1, type => SCALAR, },
-    );
+    my %rules = ( epoch => { optional => 1, type => SCALAR, }, );
 
     my %args = validate( @_, \%rules );
 
@@ -101,7 +99,7 @@ sub get_dt {
         $dt = DateTime->now;
     }
 
-    $dt->set_time_zone('America/Chicago');
+    $dt->set_time_zone( 'America/Chicago' );
     return $dt;
 
 }
@@ -118,8 +116,8 @@ Accepts an optional second argument (currency)
 
 sub moneypad {
 
-    my $number      = shift;
-    my $currency    = shift;
+    my $number   = shift;
+    my $currency = shift;
 
     if ( $currency && $currency eq 'JPY' ) {
         return round( $number, 0 );
@@ -144,7 +142,6 @@ sub commapad {
 
 }
 
-
 =head2 round( $number, $decimal_places )
 
 Round numbers to 2 decimal places unless otherwise specified
@@ -153,13 +150,13 @@ Round numbers to 2 decimal places unless otherwise specified
 
 sub round {
 
-    my ($n, $p) = @_;
-    no warnings; ## no critic
-    unless ( $p =~ /[0-9]/) { $p = 2 }
+    my ( $n, $p ) = @_;
+    no warnings;    ## no critic
+    unless ( $p =~ /[0-9]/ ) { $p = 2 }
     use warnings;
     $n = 1 if !isnum( $n );
     my $add = $n < 0 ? -.5 : .5;
-    return int($n * 10**$p + $add) / 10**$p;
+    return int( $n * 10**$p + $add ) / 10**$p;
 
 }
 
@@ -210,8 +207,9 @@ Returns a randomish password that can be assigned to a user.
 
 sub suggest_password {
 
-    my $foo = String::Random->new();
-    my $password = $foo->randregex('\w\w\d\d\w\w\w\d\w\w\d'); # Prints 3 random digits
+    my $foo      = String::Random->new();
+    my $password = $foo->randregex( '\w\w\d\d\w\w\w\d\w\w\d' )
+        ;    # Prints 3 random digits
     $password =~ s/[^0-9a-zA-Z]//g;
 
     return $password;
@@ -239,7 +237,7 @@ Provides an object to convert to UTF-8
 sub converter {
     require Text::Iconv;
 
-    my $converter   = Text::Iconv->new( "ISO8859-1", "utf-8" );
+    my $converter = Text::Iconv->new( "ISO8859-1", "utf-8" );
     return $converter;
 }
 
@@ -255,16 +253,15 @@ sub forcearray {
 
     my $ref = shift;
 
-    if ( ! reftype $ref ) {
+    if ( !reftype $ref ) {
         return $ref;
     }
     elsif ( reftype $ref eq 'SCALAR' ) {
-        return ${ $ref };
+        return ${$ref};
     }
     elsif ( reftype $ref eq 'ARRAY' ) {
-        return @{ $ref };
+        return @{$ref};
     }
-
 
     return;
 
@@ -281,11 +278,11 @@ sub comma_split {
     # the only way to get key/value pairs via PayPal IPN is to stuff them
     # into one param
 
-    my %custom  = ( );
-    my @pairs   = split /,/, shift;
+    my %custom = ();
+    my @pairs = split /,/, shift;
     foreach my $pair ( @pairs ) {
         my ( $name, $value ) = split /=/, $pair;
-        $custom{ $name } = $value;
+        $custom{$name} = $value;
     }
 
     return \%custom;
@@ -314,7 +311,6 @@ sub percent {
 
 }
 
-
 =head2 random_token( $length )
 
 Return a string of length $length made of of random characters.  Useful for
@@ -324,14 +320,14 @@ obscuring URLs, creating tokens etc
 
 sub random_token {
 
-    my $length  = shift || 6;
+    my $length = shift || 6;
 
-    my @avail   = ( 'A' .. 'Z', 'a' ..  'z', 0 .. 9 );
-    my $hash    = undef;
+    my @avail = ( 'A' .. 'Z', 'a' .. 'z', 0 .. 9 );
+    my $hash = undef;
 
     foreach ( 1 .. $length ) {
-       my $rand = int(rand(61));
-       $hash .= $avail[ $rand ];
+        my $rand = int( rand( 61 ) );
+        $hash .= $avail[$rand];
     }
 
     return $hash;

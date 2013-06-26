@@ -12,5 +12,4 @@ foreach my $method ( 'stream', 'path' ) {
     diag( "$method: " . $wf->$method );
 }
 
-
 done_testing();

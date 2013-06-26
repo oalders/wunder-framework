@@ -17,6 +17,6 @@ new_ok( 'Wunder::Framework::Test::Roles::Billing' );
 my $billing = Wunder::Framework::Test::Roles::Billing->new;
 
 my $pp = $billing->pp;
-isa_ok( $pp, 'Business::PayPal::API');
+isa_ok( $pp, 'Business::PayPal::API' );
 
 done_testing();

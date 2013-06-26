@@ -10,7 +10,6 @@ with 'Wunder::Framework::Roles::Geo';
 with 'Wunder::Framework::Roles::Log';
 with 'Wunder::Framework::Roles::MySQL';
 
-
 =head2 SYNOPIS
 
 Object which mixes in all available Framework roles

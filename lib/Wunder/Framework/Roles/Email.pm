@@ -80,7 +80,6 @@ sub send_msg {
 
 }
 
-
 =head2 datestamp_msg( $msg )
 
 Attach a date stamp to the msg

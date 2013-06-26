@@ -13,10 +13,10 @@ use Find::Lib '../lib';
 
 use Wunder::Framework::Versioning;
 
-my $versioning  = Wunder::Framework::Versioning->new_with_options;
-my @schemas     = sort keys %{ $versioning->config->{'db'} };
+my $versioning = Wunder::Framework::Versioning->new_with_options;
+my @schemas    = sort keys %{ $versioning->config->{'db'} };
 
-my @upgrade     = ( );
+my @upgrade = ();
 foreach my $name ( @schemas ) {
     push @upgrade, $name if $name =~ /write_root\z/;
 }
@@ -25,7 +25,6 @@ foreach my $schema_name ( @upgrade ) {
     print "Starting $schema_name...\n";
     $versioning->upgrade( $schema_name );
 }
-
 
 =head1 AUTHOR
 

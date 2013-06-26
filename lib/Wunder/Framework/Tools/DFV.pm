@@ -49,9 +49,12 @@ Generic email validation
 
 sub validate_email {
 
-    my $email   = pop;
-    my $result  = Email::Valid->address( -address => $email, -mxcheck => 1 ) ? 'yes' : 'no';
-    if ($result eq 'yes') {
+    my $email = pop;
+    my $result
+        = Email::Valid->address( -address => $email, -mxcheck => 1 )
+        ? 'yes'
+        : 'no';
+    if ( $result eq 'yes' ) {
         return $email;
     }
 
@@ -98,7 +101,7 @@ Returns true if supplied username *and* password are correct.
 sub validate_twitter_credentials {
 
     my ( $dfv, $val ) = @_;
-    $dfv->name_this('twitter_credentials');
+    $dfv->name_this( 'twitter_credentials' );
     my $data = $dfv->get_input_data( as_hashref => 1 );
 
     my $nt = Net::Twitter->new(

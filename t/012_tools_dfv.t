@@ -3,9 +3,7 @@
 use Modern::Perl;
 use Test::More tests => 1;
 
-require_ok('Wunder::Framework::Tools::DFV');
-
-
+require_ok( 'Wunder::Framework::Tools::DFV' );
 
 =head1 AUTHOR
 

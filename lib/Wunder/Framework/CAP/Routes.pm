@@ -28,19 +28,19 @@ of the same name
 
 sub register_routes {
 
-    my $self    = shift;
-    my %args    = @_;
+    my $self = shift;
+    my %args = @_;
     $self->param( strict_routes => 1 ) if $args{'strict'};
-    $self->param( debug => 1 ) if $args{'debug'};
+    $self->param( debug         => 1 ) if $args{'debug'};
 
-    my @routes  = ( );
+    my @routes = ();
 
-    if ( $self->param('routes') ) {
-        @routes = @{ $self->param('routes') };
+    if ( $self->param( 'routes' ) ) {
+        @routes = @{ $self->param( 'routes' ) };
     }
     if ( $args{'urls'} ) {
         if ( exists $args{'stackable'} && $args{'stackable'} ) {
-            $self->logger("is stackable") if $self->debug_routes;
+            $self->logger( "is stackable" ) if $self->debug_routes;
             push @routes, @{ $args{'urls'} };
         }
         else {
@@ -48,13 +48,13 @@ sub register_routes {
         }
     }
 
-    my %routes  = @routes;
+    my %routes = @routes;
 
     foreach my $rm ( values %routes ) {
         $self->run_modes( $rm => $rm );
     }
 
-    $self->param( routes => \@routes );
+    $self->param( routes        => \@routes );
     $self->param( routes_prerun => $self->process_routes );
 
     return;
@@ -87,37 +87,37 @@ many CPU cycles to regexes on URLs.
 
 sub process_routes {
 
-    my $self    = shift;
+    my $self = shift;
 
-    my @args    = ( );
-    my $error   = undef;
-    my $routes  = $self->param('routes') || [ ];
+    my @args   = ();
+    my $error  = undef;
+    my $routes = $self->param( 'routes' ) || [];
 
-    my @table   = @{ $routes };
-    my $path    = $self->query->path_info || $ENV{'SCRIPT_NAME'};
-    my $new_rm  = undef;
-    my $parts   = undef;
-    my @names   = ( );
+    my @table  = @{$routes};
+    my $path   = $self->query->path_info || $ENV{'SCRIPT_NAME'};
+    my $new_rm = undef;
+    my $parts  = undef;
+    my @names  = ();
 
-    return if !$path; # this is problem being run from the command line
+    return if !$path;    # this is problem being run from the command line
 
-    RULE:
-    foreach ( 1 .. (scalar @table)/2 ) {
+RULE:
+    foreach ( 1 .. ( scalar @table ) / 2 ) {
 
-        my $rule    = shift @table;
-        my $rm      = shift @table;
+        my $rule = shift @table;
+        my $rm   = shift @table;
 
-        $self->logger( "rule: $rule | rm: $rm ") if $self->debug_routes;
+        $self->logger( "rule: $rule | rm: $rm " ) if $self->debug_routes;
 
         if ( $rule =~ m{\A([a-zA-Z0-9/_\-]*)(.*)}gxms ) {
 
-            my $regex   = $1;
-            my $names   = $2;
+            my $regex = $1;
+            my $names = $2;
 
             if ( $path =~ m{\A$regex(.*)} ) {
                 $new_rm = $rm;
                 $parts  = $1;
-                @names  = ( );
+                @names  = ();
             }
             else {
                 # no point in continuing
@@ -133,7 +133,6 @@ sub process_routes {
 
     }
 
-
     if ( $new_rm ) {
 
         @args = split "/", $parts;
@@ -145,24 +144,26 @@ sub process_routes {
         # however, if there are more params than are allowed for, this should
         # return a 404 (or whatever the default runmode is)
 
-        if ( $self->param( 'strict_routes')
-          && scalar ( @args ) > scalar ( @names ) ) {
+        if ( $self->param( 'strict_routes' )
+            && scalar( @args ) > scalar( @names ) )
+        {
             if ( $self->debug_routes ) {
-                $self->logger( "strict routes enabled.  names exceed declared args.");
+                $self->logger(
+                    "strict routes enabled.  names exceed declared args." );
                 $self->logger( "args: " . dump \@args );
                 $self->logger( "names: " . dump \@names );
             }
             return;
         }
 
-        foreach my $i ( 0 .. scalar @args - 1) {
+        foreach my $i ( 0 .. scalar @args - 1 ) {
 
             my $value = $args[$i];
             $value =~ s{\.html?\z}{}xms;
 
             $self->query->param(
-                -name   => $names[$i],
-                -value  => $value,
+                -name  => $names[$i],
+                -value => $value,
             );
 
             if ( $self->debug_routes ) {
@@ -174,14 +175,14 @@ sub process_routes {
     }
 
     my $debug = {
-        args    => \@args,
-        error   => $error,
-        names   => \@names,
-        parts   => $parts,
-        path    => $path,
+        args      => \@args,
+        error     => $error,
+        names     => \@names,
+        parts     => $parts,
+        path      => $path,
         path_info => $self->query->path_info,
-        rm      => $new_rm,
-        strict  => $self->param( 'strict_routes' ),
+        rm        => $new_rm,
+        strict    => $self->param( 'strict_routes' ),
     };
 
     $self->param( debug_routes => $debug );
@@ -218,8 +219,8 @@ sub routes_path {
 
     my $self = shift;
 
-    if ( $self->param('debug_routes') ) {
-        return $self->param('debug_routes')->{'path'} ;
+    if ( $self->param( 'debug_routes' ) ) {
+        return $self->param( 'debug_routes' )->{'path'};
     }
 
     return;
@@ -234,7 +235,7 @@ Returns true if debugging mode is enabled
 sub debug_routes {
 
     my $self = shift;
-    return $self->param('debug');
+    return $self->param( 'debug' );
 
 }
 

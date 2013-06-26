@@ -10,4 +10,4 @@ require_ok( 'Wunder::Framework::Test::Roles::Log' );
 my $log = Wunder::Framework::Test::Roles::Log->new;
 isa_ok( $log->logger_object, "Log::Log4perl::Logger" );
 
-ok( $log->logger("log something"), "can log to file" );
+ok( $log->logger( "log something" ), "can log to file" );

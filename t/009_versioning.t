@@ -3,11 +3,10 @@
 use Modern::Perl;
 use Test::More tests => 2;
 
-require_ok('Wunder::Framework::Versioning');
+require_ok( 'Wunder::Framework::Versioning' );
 
 my $versioning = Wunder::Framework::Versioning->new();
-isa_ok ($versioning, 'Wunder::Framework::Versioning' );
-
+isa_ok( $versioning, 'Wunder::Framework::Versioning' );
 
 =head1 AUTHOR
 

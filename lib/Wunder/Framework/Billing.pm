@@ -7,10 +7,10 @@ use Math::Round qw( nearest );
 use Wunder::Framework::Tools::Toolkit qw( zeropad moneypad );
 use Wunder::Framework::Billing::Prorate;
 
-has 'monthly_rate' => ( isa => 'Num', is => 'ro', required => 1 );
-has 'months'       => ( isa => 'Num', is => 'ro', required => 1 );
-has 'rollover_day' => ( isa => 'Num', is => 'ro', required => 1 );
-has 'start_date' => ( isa => 'DateTime', is => 'ro', required => 1 );
+has 'monthly_rate' => ( isa => 'Num',      is => 'ro', required => 1 );
+has 'months'       => ( isa => 'Num',      is => 'ro', required => 1 );
+has 'rollover_day' => ( isa => 'Num',      is => 'ro', required => 1 );
+has 'start_date'   => ( isa => 'DateTime', is => 'ro', required => 1 );
 
 =head2 prorate
 

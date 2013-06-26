@@ -3,11 +3,10 @@
 use Modern::Perl;
 use Test::More tests => 2;
 
-require_ok('Wunder::Framework::FormMail');
+require_ok( 'Wunder::Framework::FormMail' );
 
 my $formmail = Wunder::Framework::FormMail->new();
-isa_ok ($formmail, 'Wunder::Framework::FormMail' );
-
+isa_ok( $formmail, 'Wunder::Framework::FormMail' );
 
 =head1 AUTHOR
 

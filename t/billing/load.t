@@ -67,12 +67,9 @@ foreach my $days ( 1 .. 14 ) {
     my $partial = ( 31 - ( $pre_rollover->day - 1 ) ) / 31;
     diag( "partial: $partial" );
 
-    my $rate = moneypad ( $prorate->monthly_rate * $partial );
-    cmp_ok(
-        $prorate->amount, '==',
-        $rate,
-        "amount is exactly correct: " . $prorate->amount
-    );
+    my $rate = moneypad( $prorate->monthly_rate * $partial );
+    cmp_ok( $prorate->amount, '==', $rate,
+        "amount is exactly correct: " . $prorate->amount );
 
     $pre_rollover->truncate( to => 'month' )->add( months => 1 );
 
@@ -109,17 +106,15 @@ foreach my $days ( 15 .. 30 ) {
     ++$partial;
     diag( "partial: $partial" );
 
-    my $rate = moneypad ( $prorate->monthly_rate * $partial );
-    cmp_ok(
-        $prorate->amount, '==',
-        $rate,
-        "amount is exactly correct: " . $prorate->amount
-    );
+    my $rate = moneypad( $prorate->monthly_rate * $partial );
+    cmp_ok( $prorate->amount, '==', $rate,
+        "amount is exactly correct: " . $prorate->amount );
 
     $post_rollover->truncate( to => 'month' )->add( months => 2 );
 
     cmp_ok( $prorate->next_payment->ymd,
-        'eq', $post_rollover->ymd, "next payment is on 1st of month after next" );
+        'eq', $post_rollover->ymd,
+        "next payment is on 1st of month after next" );
 
 }
 

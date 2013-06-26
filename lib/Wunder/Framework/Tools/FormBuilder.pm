@@ -57,9 +57,9 @@ has 'user_country' => (
 );
 
 has 'verbose' => (
-    is      => 'rw',
-    isa     => 'Int',
-    default => 0,
+    is            => 'rw',
+    isa           => 'Int',
+    default       => 0,
     documentation => 'verbose debugging output'
 );
 

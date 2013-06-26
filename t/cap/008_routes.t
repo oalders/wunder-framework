@@ -1,13 +1,12 @@
 #!/usr/bin/perl
 
 use Modern::Perl;
-use Test::More skip_all => "missing new method -- maybe test it via Super?";;
+use Test::More skip_all => "missing new method -- maybe test it via Super?";
 
-require_ok('Wunder::Framework::Routes');
+require_ok( 'Wunder::Framework::Routes' );
 
 my $routes = Wunder::Framework::Routes->new();
-isa_ok ($routes, 'Wunder::Framework::Routes' );
-
+isa_ok( $routes, 'Wunder::Framework::Routes' );
 
 =head1 AUTHOR
 

@@ -8,7 +8,6 @@ my $tools = Wunder::Framework::Tools::MySQL->new();
 
 $tools->make_grants;
 
-
 =head1 AUTHOR
 
     Olaf Alders

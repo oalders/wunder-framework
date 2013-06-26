@@ -31,8 +31,8 @@ my ( $opt, $usage ) = describe_options(
     ],
     [ 'naming=s',       'v4|current', ],
     [ 'use_namespaces', '1|0' ],
-    [ 'components=s', 'default Result components split by ,'],
-    [ 'moose', '1|0'],
+    [ 'components=s',   'default Result components split by ,' ],
+    [ 'moose',          '1|0' ],
     [],
     [ 'help', "print usage message and exit" ],
 );

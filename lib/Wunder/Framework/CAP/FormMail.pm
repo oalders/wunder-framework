@@ -38,13 +38,10 @@ sub setup {
     my $self = shift;
 
     $self->start_mode( 'send_mail' );
-    $self->run_modes(
-        send_mail => 'send_mail',
-    );
+    $self->run_modes( send_mail => 'send_mail', );
 
     $self->tmpl_path(
-        [ forcearray( $self->config->{'form_mail'}->{'template_path'} ) ]
-    );
+        [ forcearray( $self->config->{'form_mail'}->{'template_path'} ) ] );
 
     return $self->SUPER::setup;
 
@@ -58,36 +55,36 @@ The guts of the module.  Send out the mail message.  :)
 
 sub send_mail {
 
-    my $self    = shift;
-    my $q       = $self->query;
+    my $self = shift;
+    my $q    = $self->query;
 
     if ( !$self->required_ok ) {
         return $self->template->fill(
-            $self->config->{'form_mail'}->{'error_template'}, $self->stash
-        );
+            $self->config->{'form_mail'}->{'error_template'},
+            $self->stash );
     }
 
-    my $config  = $self->form_config;
+    my $config = $self->form_config;
     die "config missing" if !$config;
 
-   ### Create a new multipart message:
+    ### Create a new multipart message:
     my $msg = MIME::Lite->new(
         From    => $self->email_from,
         To      => $config->{'To'},
         Subject => $config->{'Subject'},
-        Type    =>'multipart/alternative'
+        Type    => 'multipart/alternative'
     );
 
     foreach my $header ( 'Cc', 'Bcc' ) {
-        if ( exists $config->{ $header } && $config->{ $header } ) {
-            $msg->add( $header => $config->{ $header } )
+        if ( exists $config->{$header} && $config->{$header} ) {
+            $msg->add( $header => $config->{$header} );
         }
     }
 
     ### Add parts (each "attach" has same arguments as "new"):
     my $text_part = MIME::Lite->new(
-        Type     =>'TEXT',
-        Data     => $self->text_message,
+        Type => 'TEXT',
+        Data => $self->text_message,
     );
 
     $msg->attach( $text_part );
@@ -114,8 +111,8 @@ sub send_mail {
 
         if ( $q->param( $upload ) ) {
 
-            my $filename = $q->param( $upload );
-            my $type = $q->uploadInfo( $filename )->{'Content-Type'};
+            my $filename    = $q->param( $upload );
+            my $type        = $q->uploadInfo( $filename )->{'Content-Type'};
             my $tmpfilename = $q->tmpFileName( $filename );
 
             $msg->attach(
@@ -141,13 +138,12 @@ Shortcut to config for this particular form
 
 sub _build_form_config {
 
-    my $self    = shift;
-    my $form_id = $self->query->param('form_id') || 'default';
-    return if !exists $self->config->{'form_mail'}->{ $form_id };
-    return $self->config->{'form_mail'}->{ $form_id };
+    my $self = shift;
+    my $form_id = $self->query->param( 'form_id' ) || 'default';
+    return if !exists $self->config->{'form_mail'}->{$form_id};
+    return $self->config->{'form_mail'}->{$form_id};
 
 }
-
 
 sub _build_email_from {
 
@@ -172,10 +168,10 @@ later to do encoding etc instead of just stripping things away.
 
 sub filter {
 
-    my $self    = shift;
-    my $data    = shift;
-    my $filter  = $self->config->{'form_mail'}->{'filter_regex'};
-    $data       =~ s{ $filter }{}gxms;
+    my $self   = shift;
+    my $data   = shift;
+    my $filter = $self->config->{'form_mail'}->{'filter_regex'};
+    $data =~ s{ $filter }{}gxms;
 
     return $data;
 
@@ -190,9 +186,9 @@ HTML.  Could also be parsed out later by a script etc.
 
 sub text_message {
 
-    my $self            = shift;
-    my $q               = $self->query;
-    my $text_message    = qq[Here are the contents of the form: \n\n];
+    my $self         = shift;
+    my $q            = $self->query;
+    my $text_message = qq[Here are the contents of the form: \n\n];
 
     my @ignore = forcearray( $self->form_config->{'ignore'} );
 
@@ -236,20 +232,22 @@ Checks to see if required fields have been defined and exist
 
 sub required_ok {
 
-    my $self        = shift;
-    my $q           = $self->query;
-    my $required    = $self->form_config->{'required'} ;
-    return 1 if !$required || scalar keys %{ $required } == 0;
+    my $self     = shift;
+    my $q        = $self->query;
+    my $required = $self->form_config->{'required'};
+    return 1 if !$required || scalar keys %{$required} == 0;
 
-    my @errors = ( );
+    my @errors = ();
 
-    foreach my $field ( keys %{ $required } ) {
-        #$self->logger( " $field : $required->{ $field } : " . $q->param( $field ) );
-        if ( exists $required->{ $field } && !$q->param( $field ) ) {
-            push @errors, {
-                field_name => $required->{ $field },
+    foreach my $field ( keys %{$required} ) {
+
+ #$self->logger( " $field : $required->{ $field } : " . $q->param( $field ) );
+        if ( exists $required->{$field} && !$q->param( $field ) ) {
+            push @errors,
+                {
+                field_name => $required->{$field},
                 message    => "input required",
-            };
+                };
         }
     }
 
@@ -285,6 +283,5 @@ This program is free software; you can redistribute
 it and/or modify it under the same terms as Perl itself.
 
 =cut
-
 
 1;

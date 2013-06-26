@@ -18,7 +18,7 @@ my @URLs = @ARGV;
 die 'usage: http_diff.pl $url $other_url' if scalar @URLs != 2;
 
 my $furl = Furl->new;
-my @html = ( );
+my @html = ();
 foreach my $url ( @URLs ) {
     my $res = $furl->get( $url );
     push @html, \$res->content;

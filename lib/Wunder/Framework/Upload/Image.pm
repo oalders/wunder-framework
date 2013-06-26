@@ -258,7 +258,7 @@ sub store_image {
     my $self = shift;
     my $row  = $self->store( @_ );
     my %args = @_;
-    
+
     my $info = ImageInfo( $args{base_path} . $row->path );
     $row->width( $info->{'ImageWidth'} );
     $row->height( $info->{'ImageHeight'} );
@@ -267,7 +267,6 @@ sub store_image {
     return $row;
 
 }
-
 
 =head1 AUTHOR
 

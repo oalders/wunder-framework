@@ -20,7 +20,9 @@ die "usage: dummy_versioning.pl schema_name" if !$schema_name;
 my $files = $versioning->get_change_files( $schema_name );
 
 foreach my $file ( @{$files} ) {
-    try { $versioning->log_version( $versioning->dbh( $schema_name), $file ); };
+    try {
+        $versioning->log_version( $versioning->dbh( $schema_name ), $file );
+    };
 }
 
 1;

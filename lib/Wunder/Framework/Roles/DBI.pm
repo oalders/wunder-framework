@@ -101,8 +101,6 @@ sub schema {
 
 }
 
-
-
 sub db_name {
 
     my $self = shift;

@@ -4,8 +4,8 @@ use Modern::Perl;
 use Test::Perl::Critic ( -severity => 5 );
 use Find::Lib;
 
-all_critic_ok( Find::Lib::base() . "/../lib" );    #Test all files in several $dirs
-
+all_critic_ok( Find::Lib::base() . "/../lib" )
+    ;    #Test all files in several $dirs
 
 =head1 AUTHOR
 

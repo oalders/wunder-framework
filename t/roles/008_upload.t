@@ -14,6 +14,7 @@ use Test::More tests => 1;
 use Wunder::Framework::Bundle;
 use Wunder::Framework::Test::Roles::Upload;
 
-require_ok('Wunder::Framework::Test::Roles::Upload');
+require_ok( 'Wunder::Framework::Test::Roles::Upload' );
+
 #my $upload = Wunder::Framework::Test::Roles::Upload->new;
 

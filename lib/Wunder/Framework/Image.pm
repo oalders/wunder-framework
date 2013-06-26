@@ -68,7 +68,7 @@ sub _build_info {
 }
 
 sub _build_magick {
-    my $self   = shift;
+    my $self = shift;
     require Graphics::Magick;
     my $magick = Graphics::Magick->new;
     my $status = $magick->Read( $self->file );
@@ -145,15 +145,15 @@ sub resize {
     my $y = $self->info->{ImageHeight};
 
     # these calculations swiped from Image::Resize
-    my $k_h    = ( $self->max_height / $y ) || 1;
-    my $k_w    = ( $self->max_width / $x ) || 1;
+    my $k_h = ( $self->max_height / $y ) || 1;
+    my $k_w = ( $self->max_width / $x )  || 1;
     my $k      = ( $k_h < $k_w ? $k_h : $k_w );
     my $height = int( $y * $k );
     my $width  = int( $x * $k );
 
     $self->magick->Set( quality => 100 );
 
-    $self->logger("width => $width, height => $height");
+    $self->logger( "width => $width, height => $height" );
     my $status = $self->magick->Resize( width => $width, height => $height );
     die $status if $status;
 
