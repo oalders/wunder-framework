@@ -73,32 +73,34 @@ sub dbh {
 
 }
 
-sub schema {
+{
+    my $cache;
 
-    my $self       = shift;
-    my $connection = $self->_validate_connection( @_ );
+    sub schema {
 
-    $self->{'__wf_schema'} = {} if !$self->{'__wf_schema'};
-    my $cache = $self->{'__wf_schema'};
+        my $self       = shift;
+        my $connection = $self->_validate_connection( @_ );
 
-    if ( !exists $cache->{$connection} ) {
+        if ( !exists $cache->{$connection} ) {
 
-        my $db = $self->config->{'db'}->{$connection};
+            my $db = $self->config->{'db'}->{$connection};
 
-        # remove need to "use" namespace first (especially in tests)
-        ## no critic (ProhibitStringyEval)
-        eval "require $db->{namespace}";
-        ## use critic
+            # remove need to "use" namespace first (especially in tests)
+            ## no critic (ProhibitStringyEval)
+            eval "require $db->{namespace}";
+            ## use critic
 
-        $cache->{$connection} = $db->{'namespace'}
-            ->connect( $db->{dsn}, $db->{user}, $db->{pass}, $db->{attrs} );
+            $cache->{$connection}
+                = $db->{'namespace'}
+                ->connect( $db->{dsn}, $db->{user}, $db->{pass},
+                $db->{attrs} );
 
-        croak "could not connect" if !$cache->{$connection};
+            croak "could not connect" if !$cache->{$connection};
 
+        }
+
+        return $cache->{$connection};
     }
-
-    return $cache->{$connection};
-
 }
 
 sub db_name {
