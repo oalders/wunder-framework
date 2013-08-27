@@ -24,67 +24,81 @@ Returns an object using the best available Geo::IP City library
 =cut
 
 has 'geo' => (
-    is => 'ro',
-
-    #isa        => 'Geo::IP',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Maybe[Geo::IP]',
+    lazy    => 1,
+    builder => '_build_geo',
 );
 
 has 'geo_lite' => (
-    is         => 'ro',
-    isa        => 'Geo::IP',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Geo::IP',
+    lazy    => 1,
+    builder => '_build_geo_lite',
 );
 
 has 'geo_org' => (
-    is => 'ro',
-
-    #isa        => 'Geo::IP',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Geo::IP',
+    lazy    => 1,
+    builder => '_build_geo_org',
 );
 
 has 'best_geo' => (
-    is         => 'ro',
-    isa        => 'Geo::IP',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Geo::IP',
+    lazy    => 1,
+    builder => '_build_best_geo',
 );
 
 my $geo_folder = '/usr/share/GeoIP';
 
-sub _build_geo {
+{
+    my $geo;
 
-    my $self = shift;
-    my $geo  = undef;
-    my $file = $geo_folder . '/GeoIPCity.dat';
+    sub _build_geo {
 
-    return if !-e $file;
-    return Geo::IP->open( $file, GEOIP_STANDARD );
+        my $self = shift;
+        return $geo ||= do {
+            my $file = $geo_folder . '/GeoIPCity.dat';
 
+            return if !-e $file;
+            return Geo::IP->open( $file, GEOIP_STANDARD );
+        };
+    }
 }
 
-sub _build_geo_lite {
+{
+    my $geo;
 
-    my $self = shift;
-    my $geo_lite
-        = Geo::IP->open( $geo_folder . '/GeoLiteCity.dat', GEOIP_STANDARD )
-        || croak $!;
+    sub _build_geo_lite {
 
-    return $geo_lite;
-
+        my $self = shift;
+        return $geo ||= do {
+            return Geo::IP->open( $geo_folder . '/GeoLiteCity.dat',
+                GEOIP_STANDARD )
+                || croak $!;
+        };
+    }
 }
 
-sub _build_geo_org {
+{
+    my $geo;
 
-    my $self = shift;
-    return Geo::IP->open( $geo_folder . '/GeoIPOrg.dat', GEOIP_STANDARD );
-
+    sub _build_geo_org {
+        my $self = shift;
+        return $geo ||= Geo::IP->open( $geo_folder . '/GeoIPOrg.dat',
+            GEOIP_STANDARD );
+    }
 }
 
-sub _build_best_geo {
+{
+    my $geo;
 
-    my $self = shift;
-    return $self->geo || $self->geo_lite;
-
+    sub _build_best_geo {
+        my $self = shift;
+        return $geo ||= do { return $self->geo || $self->geo_lite };
+    }
 }
 
 =head1 AUTHOR

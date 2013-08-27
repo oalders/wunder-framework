@@ -42,9 +42,10 @@ using the framework without initialized config files.
 =cut
 
 has 'config' => (
-    is         => 'rw',
-    isa        => 'HashRef',
-    lazy_build => 1,
+    is      => 'rw',
+    isa     => 'HashRef',
+    lazy    => 1,
+    builder => '_build_config',
 );
 
 has 'config_base' => (
@@ -53,36 +54,39 @@ has 'config_base' => (
     lazy_build => 1,
 );
 
-sub _build_config {
+{
+    my $_config;
 
-    my $self = shift;
+    sub _build_config {
+        my $self = shift;
 
-    my $base   = $self->config_base . $self->stream . "/base.cfg";
-    my $config = {};
+        return $_config ||= do {
+            my $base   = $self->config_base . $self->stream . "/base.cfg";
+            my $config = {};
 
-    if ( -e $base ) {
-        $config = { Config::General->new( $base )->getall };
-    }
-
-    foreach my $type ( 'global', $self->stream . '/local' ) {
-
-        my $file = $self->config_base . $type . '.cfg';
-
-        if ( -e $file ) {
-            my $add_config = { Config::General->new( $file )->getall };
-
-            if ( $type =~ m{local} ) {
-                $config = merge( $add_config, $config );
+            if ( -e $base ) {
+                $config = { Config::General->new( $base )->getall };
             }
-            else {
-                $config = merge( $config, $add_config );
+
+            foreach my $type ( 'global', $self->stream . '/local' ) {
+
+                my $file = $self->config_base . $type . '.cfg';
+
+                if ( -e $file ) {
+                    my $add_config
+                        = { Config::General->new( $file )->getall };
+
+                    if ( $type =~ m{local} ) {
+                        $config = merge( $add_config, $config );
+                    }
+                    else {
+                        $config = merge( $config, $add_config );
+                    }
+                }
             }
-        }
-
+            return $config;
+        };
     }
-
-    return $config;
-
 }
 
 sub _build_config_base {

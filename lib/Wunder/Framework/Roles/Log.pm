@@ -19,9 +19,10 @@ logger object exists.  Returns a lazy loading "singleton" object.
 =cut
 
 has 'logger_object' => (
-    is         => 'ro',
-    isa        => 'Log::Log4perl::Logger',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Log::Log4perl::Logger',
+    lazy    => 1,
+    builder => '_build_logger_object',
 );
 
 sub logger {
@@ -32,33 +33,44 @@ sub logger {
 
 }
 
-sub _build_logger_object {
+{
+    my $logger;
+
+    sub _build_logger_object {
+
+        my $self = shift;
+
+        return $logger ||= do {
+            if ( exists $self->config->{'log_file'} ) {
+
+                Log::Log4perl->init( $self->config->{'log_file'} );
+                return Log::Log4perl->get_logger( $self->config->{'log_level'}
+                        || 'INFO' );
+            }
+
+            Log::Log4perl->init( $self->init );
+            return Log::Log4perl->get_logger( 'INFO' );
+
+        };
+    }
+}
+
+sub _logger_init {
 
     my $self = shift;
-
-    if ( exists $self->config->{'log_file'} ) {
-
-        Log::Log4perl->init( $self->config->{'log_file'} );
-        return Log::Log4perl->get_logger( $self->config->{'log_level'}
-                || 'INFO' );
-    }
-
     my $path = $self->path;
-    my $init = qq[
-        log4perl.rootLogger=DEBUG, LOGFILE
-        log4perl.category.Wunder.Base = DEBUG, LOGFILE
+    my $init = <<EOF;
+log4perl.rootLogger=DEBUG, LOGFILE
+log4perl.category.Wunder.Base = DEBUG, LOGFILE
 
-        log4perl.appender.LOGFILE=Log::Log4perl::Appender::File
-        log4perl.appender.LOGFILE.filename=$path/logs/perl.log
-        log4perl.appender.LOGFILE.mode=append
+log4perl.appender.LOGFILE=Log::Log4perl::Appender::File
+log4perl.appender.LOGFILE.filename=$path/logs/perl.log
+log4perl.appender.LOGFILE.mode=append
 
-        log4perl.appender.LOGFILE.layout=PatternLayout
-        log4perl.appender.LOGFILE.layout.ConversionPattern=[%d] %F %L - %m%n
-    ];
-
-    Log::Log4perl->init( \$init );
-    return Log::Log4perl->get_logger( 'INFO' );
-
+log4perl.appender.LOGFILE.layout=PatternLayout
+log4perl.appender.LOGFILE.layout.ConversionPattern=[%d] %F %L - %m%n
+EOF
+    return \$init;
 }
 
 =head1 AUTHOR
