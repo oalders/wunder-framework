@@ -48,7 +48,7 @@ sub logger {
                         || 'INFO' );
             }
 
-            Log::Log4perl->init( $self->init );
+            Log::Log4perl->init( $self->_logger_init );
             return Log::Log4perl->get_logger( 'INFO' );
 
         };
