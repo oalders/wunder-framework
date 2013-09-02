@@ -259,6 +259,8 @@ sub build_form {
                     -size      => $args{'size'},
                     -maxlength => $1,
                     -disabled  => 1,
+                    -class     => 'form-control',    # bootstrap
+
                 );
             }
 
@@ -268,6 +270,8 @@ sub build_form {
                     -name      => $name,
                     -size      => $args{'size'},
                     -maxlength => $1,
+                    -class     => 'form-control',    # bootstrap
+
                 );
 
             }
@@ -277,8 +281,10 @@ sub build_form {
                 if ( $args{'dwiw'} && $name eq 'country' ) {
 
                     my %country = (
-                        name     => $name,
-                        id       => $name,
+                        name   => $name,
+                        id     => $name,
+                        -class => 'form-control',    # bootstrap
+
                         onchange => 'update_region()',
                     );
 
@@ -291,8 +297,10 @@ sub build_form {
                 elsif ( $args{'dwiw'} && $name eq 'region' ) {
                     $element = $self->region_menu(
                         $self->user_country,
-                        {   name => $name,
-                            id   => $name,
+                        {   name   => $name,
+                            id     => $name,
+                            -class => 'form-control',    # bootstrap
+
                         }
                     );
                 }
@@ -306,6 +314,8 @@ sub build_form {
                         -name      => $name,
                         -size      => $args{'size'},
                         -maxlength => $1,
+                        -class     => 'form-control',    # bootstrap
+
                     );
                 }
             }
@@ -327,6 +337,8 @@ sub build_form {
                 -name   => $name,
                 -values => \@values,
                 -labels => \%labels,
+                -class  => 'form-control',    # bootstrap
+
             );
         }
 
@@ -342,6 +354,8 @@ sub build_form {
             $element = $q->popup_menu(
                 -name   => $name,
                 -values => \@enum,
+                -class  => 'form-control',    # bootstrap
+
             );
 
         }
@@ -359,6 +373,7 @@ sub build_form {
                     -maxlength => $size,
                     -disabled  => 1,
                     -id        => $name,
+                    -class     => 'form-control',    # bootstrap
                 );
             }
 
@@ -369,6 +384,7 @@ sub build_form {
                     -size      => $size,
                     -maxlength => $size,
                     -id        => $name,
+                    -class     => 'form-control',    # bootstrap
                 );
 
             }
@@ -381,6 +397,7 @@ sub build_form {
                 -rows    => 10,
                 -columns => $args{'size'},
                 -id      => $name,
+                -class   => 'form-control',    # bootstrap
             );
 
         }
@@ -389,8 +406,9 @@ sub build_form {
         {
 
             $element = $q->filefield(
-                -name => $name,
-                -id   => $name,
+                -name  => $name,
+                -id    => $name,
+                -class => 'form-control',      # bootstrap
             );
 
         }
@@ -646,6 +664,7 @@ sub region_menu {
             -size      => 20,
             -maxlength => 30,
             -id        => 'region_code',
+            -class     => 'form-control',    # bootstrap
             %{$args},
         );
 
@@ -665,6 +684,7 @@ sub region_menu {
         -values => \@codes,
         -labels => \%codes,
         -id     => 'region_code',
+        -class  => 'form-control',    # bootstrap
         %{$args},
     );
 
@@ -945,28 +965,31 @@ sub get_date_menu {
     $readonly = "disabled => 1" if $args{'readonly'};
 
     my @months = dt_pad( 1 .. 12 );
-    push @elements,
-        $q->popup_menu(
+    push @elements, $q->popup_menu(
         -name   => $name . '_month',
         -values => \@months,
         -labels => $months,
+        -class  => 'form-control',     # bootstrap
+
         $readonly
-        );
+    );
 
     my @days = dt_pad( 1 .. 31 );
-    push @elements,
-        $q->popup_menu(
+    push @elements, $q->popup_menu(
         -name   => $name . '_day',
         -values => \@days,
-        $readonly
-        );
+        -class  => 'form-control',     # bootstrap
 
-    push @elements,
-        $q->popup_menu(
+        $readonly
+    );
+
+    push @elements, $q->popup_menu(
         -name   => $name . '_year',
         -values => [ 2006 .. ( $self->wf->dt->year + 5 ) ],
+        -class  => 'form-control',                            # bootstrap
+
         $readonly
-        );
+    );
 
     return join " ", @elements;
 
@@ -993,28 +1016,31 @@ sub get_timestamp_menu {
     my @elements = ();
 
     my @hours = dt_pad( 0 .. 23 );
-    push @elements,
-        $q->popup_menu(
+    push @elements, $q->popup_menu(
         -name   => $name . '_hour',
         -values => \@hours,
+        -class  => 'form-control',    # bootstrap
+
         $readonly
-        );
+    );
 
     my @minutes = dt_pad( 0 .. 59 );
-    push @elements,
-        $q->popup_menu(
+    push @elements, $q->popup_menu(
         -name   => $name . '_minute',
         -values => \@minutes,
+        -class  => 'form-control',      # bootstrap
+
         $readonly
-        );
+    );
 
     my @seconds = dt_pad( 0 .. 59 );
-    push @elements,
-        $q->popup_menu(
+    push @elements, $q->popup_menu(
         -name   => $name . '_second',
         -values => \@seconds,
+        -class  => 'form-control',      # bootstrap
+
         $readonly
-        );
+    );
 
     return join " ", @elements;
 
@@ -1040,6 +1066,8 @@ sub expiration_month {
     return $q->popup_menu(
         -name   => 'expiration_month',
         -values => \@months,
+        -class  => 'form-control',       # bootstrap
+
         %args,
     );
 
@@ -1069,6 +1097,8 @@ sub expiration_year {
     return $q->popup_menu(
         -name   => 'expiration_year',
         -values => [ $dt->year .. $dt->year + $years ],
+        -class  => 'form-control',                        # bootstrap
+
         %args,
     );
 
