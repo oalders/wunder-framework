@@ -593,6 +593,7 @@ sub country_menu {
     return CGI->new()->popup_menu(
         -values => \@codes,
         -labels => $self->country_code_hash,
+        -class  => 'form-control',
         %args,
     );
 }
