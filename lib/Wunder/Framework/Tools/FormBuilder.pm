@@ -15,6 +15,7 @@ use Wunder::Framework::Tools::Toolkit qw( converter dt_pad get_dt zeropad );
 use Carp;
 use CGI;
 use Data::Dump qw( dump );
+use Encode;
 use Locale::Country qw( code2country );
 use Locale::SubCountry;
 use Modern::Perl;
