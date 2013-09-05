@@ -15,7 +15,7 @@ use Wunder::Framework::Tools::Toolkit qw( converter dt_pad get_dt zeropad );
 use Carp;
 use CGI;
 use Data::Dump qw( dump );
-use Encode;
+use Locale::Country qw( code2country );
 use Locale::SubCountry;
 use Modern::Perl;
 use Params::Validate qw( validate validate_pos SCALAR ARRAYREF HASHREF );
@@ -37,7 +37,7 @@ my %menu_rules = (
 
 has 'encode_this' => (
     is            => 'rw',
-    isa           => 'Int',
+    isa           => 'Bool',
     default       => 0,
     documentation => 'Enable if output is not utf8'
 );
@@ -515,18 +515,33 @@ Returns a list of country codes sorted alphabetically by country *name*
 =cut
 
 sub country_codes {
+    my $self      = shift;
+    my %countries = %{ $self->country_code_hash };
 
-    my $self                      = shift;
-    my $world                     = Locale::SubCountry::World->new();
-    my %all_country_keyed_by_code = $world->code_full_name_hash;
-
-    my @codes = sort {
-        $all_country_keyed_by_code{$a} cmp $all_country_keyed_by_code{$b}
-    } keys %all_country_keyed_by_code;
+    my @codes = sort { $countries{$a} cmp $countries{$b} } keys %countries;
 
     return \@codes;
-
 }
+
+=head2 country_code_hash
+
+Returns a hash of countries keyed on 2 letter ISO codes.
+
+=cut
+
+sub country_code_hash {
+    my $self                      = shift;
+    my $world                     = Locale::SubCountry::World->new();
+
+    my %countries = $world->code_full_name_hash;
+    foreach my $code ( keys %countries ) {
+        my $name = code2country( $code ); # better utf8 support
+        $countries{$code} = $name if $name;
+    }
+
+    return \%countries;
+}
+
 
 =head2 country_menu( $params )
 
@@ -570,29 +585,15 @@ sub country_menu {
         %args = validate( @args, \%rules );
     }
 
-    my $world                     = Locale::SubCountry::World->new();
-    my %all_country_keyed_by_code = $world->code_full_name_hash;
+    my @codes    = @{ $self->country_codes() };
+    my $nullable = delete $args{nullable};
+    unshift @codes, q{} if $nullable;
 
-    my @codes = @{ $self->country_codes() };
-
-    if ( exists $args{'nullable'} ) {
-        if ( $args{'nullable'} ) {
-            unshift @codes, "";
-        }
-        delete $args{'nullable'};
-    }
-
-    my $q = CGI->new;
-
-    my $menu = $q->popup_menu(
+    return CGI->new()->popup_menu(
         -values => \@codes,
-        -labels => \%all_country_keyed_by_code,
+        -labels => $self->country_code_hash,
         %args,
     );
-
-    return encode( "utf8", $menu ) if ( $self->encode_this );
-    return decode( "utf8", $menu );
-
 }
 
 =head2 get_user_country
