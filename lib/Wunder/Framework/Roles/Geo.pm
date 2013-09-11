@@ -76,7 +76,7 @@ my $geo_folder = '/usr/share/GeoIP';
         my $self = shift;
         return $geo ||= do {
             return Geo::IP->open( $geo_folder . '/GeoLiteCity.dat',
-                GEOIP_STANDARD )
+                GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE )
                 || croak $!;
         };
     }
