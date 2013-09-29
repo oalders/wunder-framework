@@ -1,1 +1,14 @@
+requires 'Config::General';
+requires 'DBIx::Class';
+requires 'DateTime';
+requires 'DateTime::Format::Mail';
+requires 'DateTime::Format::MySQL';
+requires 'Geo::IP', '<= 1.40';
+requires 'Hash::Merge';
 requires 'Locale::Country';
+requires 'Log::Log4perl';
+requires 'MIME::Lite';
+requires 'Modern::Perl';
+requires 'MooseX::Params::Validate';
+requires 'Scalar::Util::Numeric';
+requires 'String::Random';
