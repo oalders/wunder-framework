@@ -6,7 +6,6 @@ use Moose::Role;
 
 use DateTime;
 use DateTime::Format::MySQL;
-use Devel::SimpleTrace;
 use Modern::Perl;
 use MooseX::Params::Validate;
 
