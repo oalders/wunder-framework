@@ -1,8 +1,9 @@
 package Wunder::Framework::CAP::Routes;
 
-use Moose;
-use Modern::Perl;
 use Data::Dump qw( dump );
+use Modern::Perl;
+use Moose;
+use URI;
 
 =head1 SYNOPSIS
 
@@ -93,8 +94,10 @@ sub process_routes {
     my $error  = undef;
     my $routes = $self->param( 'routes' ) || [];
 
-    my @table  = @{$routes};
-    my $path   = $self->query->path_info || $ENV{'SCRIPT_NAME'};
+    my @table = @{$routes};
+    my $path
+        = URI->new( $self->query->env->{REQUEST_URI} )->path
+        || $ENV{'SCRIPT_NAME'};
     my $new_rm = undef;
     my $parts  = undef;
     my @names  = ();
