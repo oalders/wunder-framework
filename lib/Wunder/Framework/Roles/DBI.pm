@@ -77,7 +77,11 @@ sub dbh {
     my $connection = $self->_validate_connection( @_ );
 
     my $db = $self->_db_config->{$connection};
+    if ( $db->{namespace} ) {
+        return $self->schema( $connection )->storage->dbh;
+    }
 
+    # 99% of code will never reach this point
     $self->{'__wf_db'} = {} if !$self->{'__wf_db'};
     my $cache = $self->{'__wf_db'};
 
