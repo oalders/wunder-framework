@@ -16,4 +16,5 @@ Object which mixes in all available Framework roles
 
 =cut
 
+__PACKAGE__->meta->make_immutable();
 1;

@@ -22,6 +22,7 @@ has _db_config => (
 has _fixture_dbs => (
     is      => 'rw',
     isa     => 'HashRef[Str]',
+    lazy    => 1,
     default => sub { {} },
 );
 
@@ -103,15 +104,15 @@ sub dbh {
 
     sub schema {
 
-        my $self = shift;
-        my $name = $self->_validate_connection( @_ );
+        my $self          = shift;
+        my $schema_handle = $self->_validate_connection( @_ );
 
-        if ( !exists $cache->{$name} ) {
+        if ( !exists $cache->{$schema_handle} ) {
 
             if ( $self->_fixtures_enabled ) {
-                $self->_set_up_fixtures( $name );
+                $self->_set_up_fixture_db( $schema_handle );
             }
-            my $db = $self->_db_config->{$name};
+            my $db = $self->_db_config->{$schema_handle};
 
             confess 'namespace required' if !$db->{namespace};
 
@@ -120,81 +121,76 @@ sub dbh {
             eval "require $db->{namespace}";
             ## use critic
 
-            $cache->{$name}
+            $cache->{$schema_handle}
                 = $db->{'namespace'}
                 ->connect( $db->{dsn}, $db->{user}, $db->{pass},
                 $db->{attrs} );
 
-            confess "could not connect" if !$cache->{$name};
+            confess "could not connect" if !$cache->{$schema_handle};
 
         }
 
-        return $cache->{$name};
+        return $cache->{$schema_handle};
     }
 }
 
 sub db_name {
 
-    my $self = shift;
-    my $name = $self->_validate_connection( shift );
-    return $self->_db_config->{$name}->{database};
+    my $self          = shift;
+    my $schema_handle = $self->_validate_connection( shift );
+    return $self->_db_config->{$schema_handle}->{database};
 
 }
 
 sub _validate_connection {
     my $self = shift;
-    my $name = shift || $self->config->{'schema'}->{'default'};
+    my $schema_handle = shift || $self->config->{'schema'}->{'default'};
 
-    if ( !$name ) {
+    if ( !$schema_handle ) {
         confess "no schema name supplied and no default set";
     }
-    elsif ( !exists $self->_db_config->{$name} ) {
-        confess "bad schema name supplied: $name";
+    elsif ( !exists $self->_db_config->{$schema_handle} ) {
+        confess "bad schema name supplied: $schema_handle";
     }
 
-    return $name;
+    return $schema_handle;
 }
 
-sub _set_up_fixtures {
-    my $self = shift;
-    my $name = shift;
+sub _set_up_fixture_db {
+    my $self          = shift;
+    my $schema_handle = shift;
 
-    my $base_name = $name;
+    my $base_name = $schema_handle;
     $base_name =~ s{(read|write|write_root)\z}{};
 
-    my $db_config = $self->_db_config->{$name};
+    my $db_config = $self->_db_config->{$schema_handle};
 
     confess 'Fixture config missing' if !$db_config;
-    confess 'Are you sure this is a fixture db?'
-        if $db_config->{database} !~ m{\A(test_|memory)};
+    if ( $db_config->{database} !~ m{\A(test_|memory)} ) {
+        p $db_config;
+        confess 'Are you sure this is a fixture db?';
+    }
 
-    my $select
-        = qq[select count(*) from mysql.db where Db = '$db_config->{database}'];
+    return if $self->_fixture_dbs->{ $db_config->{database} };
 
-    my ( $exists )
-        = $self->dbh( $base_name . 'master' )->selectrow_array( $select );
+    # this is actually necessary, despite the line above
+    my $select = qq[SHOW DATABASES LIKE '$db_config->{database}'];
 
-    return if $exists;
+    my $exists
+        = $self->dbh( $base_name . 'master' )->selectrow_arrayref( $select );
+
+    return if $exists->[0];
 
     my $master = $base_name . 'master';
     $self->dbh( $master )->do( 'CREATE DATABASE ' . $db_config->{database} );
     $self->_fixture_dbs->{ $db_config->{database} } = $master;
 
-
     # this is what i really wanted to do
     #$self->schema( $base_name . 'write_root' )->deploy;
     #return;
 
-    my @ddl = read_file( $self->path . '/' . $db_config->{ddl_path} );
-    my @sql;
-
-    # whatever. it's brittle, but it works for now.
-    foreach my $line ( @ddl ) {
-        next if $line =~ m{\A/};
-        push @sql, $line;
-    }
-    my $ddl = join q{}, @sql;
-    my @statements = split m{;}, $ddl;
+    my $ddl = read_file( $self->path . '/' . $db_config->{ddl_path} );
+    my @statements = split m{;\n}, $ddl;
 
     foreach my $statement ( @statements ) {
         $self->dbh( $base_name . 'write_root' )->do( $statement );
@@ -202,7 +198,7 @@ sub _set_up_fixtures {
     return;
 }
 
-before 'DESTROY' => sub {
+sub DEMOLISH {
     my $self = shift;
 
     return unless $self->_fixtures_enabled;
@@ -215,7 +211,7 @@ before 'DESTROY' => sub {
         }
         $self->dbh( $dbs->{$db} )->do( 'DROP DATABASE ' . $db );
     }
-};
+}
 
 1;
 
@@ -251,7 +247,9 @@ assumption.
 
 DBIx::Class lazy loading
 
-=cut
+=head2 DEMOLISH
+
+Drop any fixture databases at object teardown.
 
 =head1 AUTHOR
 

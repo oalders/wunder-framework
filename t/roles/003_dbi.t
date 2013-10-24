@@ -9,10 +9,11 @@ foreach my $name ( keys %{ $test->config->{'db'} } ) {
     next if $name eq 'slave';
 
     my $db = $test->config->{'db'}->{$name};
+    diag $name;
 
 SKIP: {
         skip 'not every connection needs a namespace', 2
-            if ( !exists $db->{'namespace'} );
+            if ( !$db->{'namespace'} );
 
         next if $db->{disabled};
 
