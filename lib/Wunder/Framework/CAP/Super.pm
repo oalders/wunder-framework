@@ -1,118 +1,29 @@
 package Wunder::Framework::CAP::Super;
 
-use Moose;
-use Modern::Perl;
-use MooseX::Params::Validate;
+use strict;
+use warnings;
+use namespace::autoclean;
 
-extends qw( CGI::Application::Plugin::HTDot CGI::Application );
-
-with 'Wunder::Framework::Roles::Config';
-with 'Wunder::Framework::Roles::Deployment';
-with 'Wunder::Framework::Roles::DBI';
-with 'Wunder::Framework::Roles::DateTime';
-with 'Wunder::Framework::Roles::Email';
-with 'Wunder::Framework::Roles::Geo';
-with 'Wunder::Framework::Roles::Log';
-
-# "Use" libraries that we *always* need
-use Carp qw( croak );
 use CGI::Application::Plugin::AnyTemplate;
 use CGI::Application::Plugin::FillInForm ( qw/fill_form/ );
 use CGI::Application::Plugin::Forward;
 use CGI::Application::Plugin::Redirect;
 use CGI::Application::Plugin::Stash;
+use Carp qw( croak );
 use Data::Dump qw( dump );
+use Moose;
+use MooseX::NonMoose;
+use MooseX::Params::Validate;
 use Params::Validate qw( validate validate_pos SCALAR );
-
 use Wunder::Framework::Tools::FormBuilder;
-use Wunder::Framework::Tools::Toolkit
-    qw( commify converter get_dt round moneypad );
+use Wunder::Framework::Tools::Toolkit qw( commify converter get_dt round moneypad );
 
-=head2 SYNOPSIS
+extends qw( CGI::Application::Plugin::HTDot CGI::Application );
 
-The Wunder SuperClass.  Methods in here will generally be methods that will
-override core methods in CGI::Application.
-
-=head2 add_to_path( \@paths )
-
-Add template directories to the tmpl_path param
-
-=cut
-
-=head2 cgiapp_init
-
-Set up some basic config variables.
-
-=head2 env
-
-Returns the current %ENV as a HashRef. If we're running under Plack, the Plack
-env is returned.
-
-=head2 fb
-
-Returns a FormBuilder object
-
-=head2 is_plack
-
-Returns true if this application is being run under Plack.
-
-=head2 load_tmpl
-
-Turns on caching and turns off param checking in *every* case.  I never
-want to die on bad params otherwise, so why start now?  Caching now off
-bec. it seemed to cause conflicts across sites with similar template
-names.
-
-=head2 not_found
-
-Generic routine to generate 404 pages
-
-=head2 push_tmpl_path
-
-Convenience method for add_to_path
-
-=head2 stash_cols( $dbic )
-
-When provided with a DBIC object, will stash each column as a param.  Good
-for TT.
-
-=head2 tt( $template )
-
-Shortcut for rendering TT templates
-
-=head2 tt_filters
-
-Stub method for supplying filter methods to Template Toolkit
-
-=head2 template_config
-
-Override this method to set custom template configuration options
-
-=head2 status codes
-
-=head3 status_msg
-
-Generic handling of Apache status codes.  Attach additional error msg for
-clarification if present.
-
-=head3 bad_request
-
-Generic routine to generate 400 pages when url and params are
-correct, but don't make any sense
-
-=head3 unauthorized
-
-Generic routine to generate 401 pages when proper user
-credentials are missing
-
-=head2 _error_handler
-
-Try to do something useful with state of CGI if unexpected death occurs.
-Enable this in your class by adding the following to setup()
-
-$self->error_mode( '_error_handler' );
-
-=cut
+with 'Wunder::Framework::Roles::Config',
+    'Wunder::Framework::Roles::Deployment', 'Wunder::Framework::Roles::DBI',
+    'Wunder::Framework::Roles::DateTime',   'Wunder::Framework::Roles::Email',
+    'Wunder::Framework::Roles::Geo',        'Wunder::Framework::Roles::Log';
 
 has 'env' => (
     is         => 'ro',
@@ -417,6 +328,97 @@ sub stash_cols {
 
 }
 
+__PACKAGE__->meta->make_immutable();
+
+1;
+
+=head2 SYNOPSIS
+
+The Wunder SuperClass.  Methods in here will generally be methods that will
+override core methods in CGI::Application.
+
+=head2 add_to_path( \@paths )
+
+Add template directories to the tmpl_path param
+
+=cut
+
+=head2 cgiapp_init
+
+Set up some basic config variables.
+
+=head2 env
+
+Returns the current %ENV as a HashRef. If we're running under Plack, the Plack
+env is returned.
+
+=head2 fb
+
+Returns a FormBuilder object
+
+=head2 is_plack
+
+Returns true if this application is being run under Plack.
+
+=head2 load_tmpl
+
+Turns on caching and turns off param checking in *every* case.  I never
+want to die on bad params otherwise, so why start now?  Caching now off
+bec. it seemed to cause conflicts across sites with similar template
+names.
+
+=head2 not_found
+
+Generic routine to generate 404 pages
+
+=head2 push_tmpl_path
+
+Convenience method for add_to_path
+
+=head2 stash_cols( $dbic )
+
+When provided with a DBIC object, will stash each column as a param.  Good
+for TT.
+
+=head2 tt( $template )
+
+Shortcut for rendering TT templates
+
+=head2 tt_filters
+
+Stub method for supplying filter methods to Template Toolkit
+
+=head2 template_config
+
+Override this method to set custom template configuration options
+
+=head2 status codes
+
+=head3 status_msg
+
+Generic handling of Apache status codes.  Attach additional error msg for
+clarification if present.
+
+=head3 bad_request
+
+Generic routine to generate 400 pages when url and params are
+correct, but don't make any sense
+
+=head3 unauthorized
+
+Generic routine to generate 401 pages when proper user
+credentials are missing
+
+=head2 _error_handler
+
+Try to do something useful with state of CGI if unexpected death occurs.
+Enable this in your class by adding the following to setup()
+
+$self->error_mode( '_error_handler' );
+
+=cut
+
+
 =head1 AUTHOR
 
     Olaf Alders
@@ -432,4 +434,3 @@ it and/or modify it under the same terms as Perl itself.
 
 =cut
 
-1;
