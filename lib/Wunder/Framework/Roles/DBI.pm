@@ -193,7 +193,12 @@ sub _set_up_fixture_db {
     #$self->schema( $base_name . 'write_root' )->deploy;
     #return;
 
-    my $ddl = read_file( $self->path . '/' . $db_config->{ddl_path} );
+    my $ddl_path
+        = substr( $db_config->{ddl_path}, 0, 1 ) eq '/'
+        ? $db_config->{ddl_path}
+        : $self->path . '/' . $db_config->{ddl_path};
+
+    my $ddl = read_file( $ddl_path );
     my @statements = split m{;\n}, $ddl;
 
     foreach my $statement ( @statements ) {
