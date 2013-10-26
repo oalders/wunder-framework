@@ -2,7 +2,6 @@ package Wunder::Framework::CAP::Super;
 
 use strict;
 use warnings;
-use namespace::autoclean;
 
 use CGI::Application::Plugin::AnyTemplate;
 use CGI::Application::Plugin::FillInForm ( qw/fill_form/ );

@@ -8,7 +8,6 @@ use Moose::Role;
 use Carp qw( confess );
 use Devel::SimpleTrace;
 use DBI;
-use DDP;
 use File::Slurp qw( read_file );
 use Hash::Merge;
 
