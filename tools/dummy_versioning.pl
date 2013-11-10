@@ -14,10 +14,11 @@ use Wunder::Framework::Versioning;
 
 my $versioning  = Wunder::Framework::Versioning->new_with_options;
 my $schema_name = shift @ARGV;
+my $file        = shift @ARGV;
 
-die "usage: dummy_versioning.pl schema_name" if !$schema_name;
+die "usage: dummy_versioning.pl schema_name [file_name]" if !$schema_name;
 
-my $files = $versioning->get_change_files( $schema_name );
+my $files = $file ? [$file] : $versioning->get_change_files( $schema_name );
 
 foreach my $file ( @{$files} ) {
     say $file;
