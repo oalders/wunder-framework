@@ -96,8 +96,9 @@ sub process_routes {
 
     my @table = @{$routes};
     my $path
-        = URI->new( $self->query->env->{REQUEST_URI} )->path
-        || $ENV{'SCRIPT_NAME'};
+        = $self->query->can( 'env' )
+        ? URI->new( $self->query->env->{REQUEST_URI} )->path
+        : $ENV{'SCRIPT_NAME'};
     my $new_rm = undef;
     my $parts  = undef;
     my @names  = ();
