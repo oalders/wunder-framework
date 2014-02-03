@@ -63,7 +63,9 @@ my $geo_folder = '/usr/share/GeoIP';
             my $file = $geo_folder . '/GeoIPCity.dat';
 
             return if !-e $file;
-            return Geo::IP->open( $file, GEOIP_STANDARD );
+            $geo = Geo::IP->open( $file, GEOIP_STANDARD );
+            $geo->set_charset( GEOIP_CHARSET_UTF8 );
+            return $geo;
         };
     }
 }
@@ -75,9 +77,12 @@ my $geo_folder = '/usr/share/GeoIP';
 
         my $self = shift;
         return $geo ||= do {
-            return Geo::IP->open( $geo_folder . '/GeoLiteCity.dat',
-                GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE )
-                || croak $!;
+            my $geo = Geo::IP->open(
+                $geo_folder . '/GeoLiteCity.dat',
+                GEOIP_MEMORY_CACHE | GEOIP_CHECK_CACHE
+            ) || croak $!;
+            $geo->set_charset( GEOIP_CHARSET_UTF8 );
+            return $geo;
         };
     }
 }
@@ -87,8 +92,11 @@ my $geo_folder = '/usr/share/GeoIP';
 
     sub _build_geo_org {
         my $self = shift;
-        return $geo ||= Geo::IP->open( $geo_folder . '/GeoIPOrg.dat',
-            GEOIP_STANDARD );
+        return $geo if $geo;
+
+        $geo = Geo::IP->open( $geo_folder . '/GeoIPOrg.dat', GEOIP_STANDARD );
+        $geo->set_charset( GEOIP_CHARSET_UTF8 );
+        return $geo;
     }
 }
 

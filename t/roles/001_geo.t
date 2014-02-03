@@ -9,7 +9,6 @@ We can't expect the paid library to be installed on every machine, so the
 
 =cut
 
-use Data::Dump qw( dump );
 use Test::More;
 use Wunder::Framework::Test::Roles::Geo;
 
@@ -24,6 +23,8 @@ ok( $roles->best_geo, "got the best geo object" );
 
 isa_ok( $roles->geo_lite, 'Geo::IP' );
 isa_ok( $roles->best_geo, 'Geo::IP' );
+
+ok( $roles->best_geo->charset, 'is utf8' );
 if ( -e '/usr/share/GeoIP/GeoIPOrg.dat' ) {
     isa_ok( $roles->geo_org, 'Geo::IP' );
 }
