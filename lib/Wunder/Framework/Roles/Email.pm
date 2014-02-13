@@ -1,13 +1,13 @@
 package Wunder::Framework::Roles::Email;
 
-use Moose::Role;
+use strict;
+use warnings;
 
-#requires 'config';
-#requires 'dt';
-
-use Modern::Perl;
 use DateTime::Format::Mail;
+use Email::Sender::Simple qw(sendmail);
 use MIME::Lite;
+use Modern::Perl;
+use Moose::Role;
 use Params::Validate qw( validate SCALAR );
 
 has 'smtp_conf' => ( is => 'rw', lazy_build => 1, );
@@ -75,7 +75,7 @@ sub send_msg {
         return 1 if $self->_send_by_smtp( $msg );
     }
 
-    return 1 if $msg->send_by_sendmail;
+    return 1 if sendmail( $msg->as_string );
     return $self->_send_by_smtp( $msg );
 
 }
@@ -151,7 +151,6 @@ sub mail_admin {
     }
 
     return $self->send_msg( $msg );
-
 }
 
 sub _send_by_smtp {

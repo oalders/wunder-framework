@@ -14,6 +14,7 @@ requires 'DateTime';
 requires 'DateTime::Format::ISO8601';
 requires 'DateTime::Format::Mail';
 requires 'DateTime::Format::MySQL';
+requires 'Email::Sender::Simple';
 requires 'Email::Valid';
 requires 'File::MimeInfo::Magic';
 requires 'File::Tools';
