@@ -2,6 +2,8 @@ language: perl
 perl:
   - "5.16"
   - "5.14"
+before_install:
+  - sudo apt-get install geoip-database
 install:
   - cpanm --installdeps --notest .
 script:
