@@ -2,8 +2,6 @@ language: perl
 perl:
   - "5.16"
   - "5.14"
-before_install:
-  - mkdir logs
 install:
   - cpanm --installdeps --notest .
 script:
