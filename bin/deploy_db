@@ -1,0 +1,9 @@
+#!/usr/bin/env perl
+
+use Modern::Perl;
+use Wunder::Framework::Bundle;
+
+my $wf = Wunder::Framework::Bundle->new;
+my $schema_name = shift @ARGV;
+
+$wf->schema( $schema_name )->deploy;
