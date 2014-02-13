@@ -35,4 +35,6 @@ SKIP: {
 
 }
 
+ok( 1 ); # on Travis everything will just be skipped
+
 done_testing();

@@ -2,6 +2,7 @@
 .tidyall*
 .tidyallrc
 cpanfile.snapshot
+local
 logs/*
 perltidy.LOG
 t/resources/tmp_logo.png

@@ -1,0 +1,16 @@
+language: perl
+perl:
+  - "5.16"
+  - "5.14"
+before_install:
+  - mkdir logs
+install:
+  - cpanm --installdeps --notest .
+script:
+  - "WF_STREAM=live WF_PATH=`pwd` prove -lrv t"
+notifications:
+  email:
+    recipients:
+      - olaf@wundersolutions.com
+    on_success: always
+    on_failure: always

@@ -127,7 +127,7 @@ sub dbh {
             eval "require $db->{namespace}";
             ## use critic
 
-            $cache->{$connection} = $db->{'namespace'}->connect(
+            $cache->{$schema_handle} = $db->{'namespace'}->connect(
                 $db->{dsn},
                 $db->{user},
                 $db->{pass},
@@ -138,28 +138,9 @@ sub dbh {
                     $db->{attrs}
                 )
             );
-
-            $cache->{$connection} = $db->{'namespace'}->connect(
-                $db->{dsn},
-                $db->{user},
-                $db->{pass},
-                merge(
-                    {   quote_char => '"',
-                        name_sep   => '.'
-                    },
-                    $db->{attrs}
-                )
-            );
-
-            $cache->{$schema_handle}
-                = $db->{'namespace'}
-                ->connect( $db->{dsn}, $db->{user}, $db->{pass},
-                $db->{attrs} );
 
             confess "could not connect" if !$cache->{$schema_handle};
-
         }
-
         return $cache->{$schema_handle};
     }
 }
