@@ -4,6 +4,11 @@ perl:
   - "5.14"
 before_install:
   - sudo apt-get install --assume-yes geoip-database geoip-bin libgeoip-dev
+  - wget -N http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+  - gunzip GeoLiteCity.dat.gz
+  - sudo mkdir -p /usr/local/share/GeoIP
+  - sudo mv /usr/local/share/GeoIP/
+
 install:
   - cpanm --verbose --installdeps --notest .
 script:
