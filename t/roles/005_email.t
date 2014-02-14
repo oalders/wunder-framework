@@ -1,11 +1,8 @@
-#!/usr/bin/perl
+use Test::Most;
 
-use Modern::Perl;
+BEGIN { $ENV{EMAIL_SENDER_TRANSPORT} = 'Test' }
 
-use Data::Dump qw( dump );
-use Test::More tests => 2;
-
-require_ok( 'Wunder::Framework::Test::Roles::Email' );
+use Wunder::Framework::Test::Roles::Email;
 
 my $test = Wunder::Framework::Test::Roles::Email->new;
 
@@ -16,4 +13,8 @@ SKIP: {
             data    => 'looks good'
         )
     );
+    my @deliveries = Email::Sender::Simple->default_transport->deliveries;
+    is( scalar @deliveries, 1, 'email sent' );
 }
+
+done_testing();
