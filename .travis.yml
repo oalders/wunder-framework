@@ -3,9 +3,9 @@ perl:
   - "5.16"
   - "5.14"
 before_install:
-  - sudo apt-get install geoip-database
+  - sudo apt-get install --assume-yes geoip-database geoip-bin libgeoip-dev
 install:
-  - cpanm --installdeps --notest .
+  - cpanm --verbose --installdeps --notest .
 script:
   - "WF_STREAM=live WF_PATH=`pwd` prove -lrv t"
 notifications:
