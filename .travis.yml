@@ -12,7 +12,7 @@ before_install:
   - sudo cp GeoLiteCity.dat /usr/share/GeoIP/
 
 install:
-  - cpanm --verbose --installdeps --notest .
+  - cpanm --quiet --installdeps --notest .
 script:
   - "WF_STREAM=live WF_PATH=`pwd` prove -lrv t"
 notifications:
