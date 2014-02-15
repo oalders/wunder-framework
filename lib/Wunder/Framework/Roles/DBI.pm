@@ -132,7 +132,7 @@ sub dbh {
                 $db->{user},
                 $db->{pass},
                 merge(
-                    {   quote_char => '"',
+                    {   quote_char => '`',
                         name_sep   => '.'
                     },
                     $db->{attrs}
