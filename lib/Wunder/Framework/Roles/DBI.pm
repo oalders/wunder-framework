@@ -9,7 +9,7 @@ use Carp qw( confess );
 use Devel::SimpleTrace;
 use DBI;
 use File::Slurp qw( read_file );
-use Hash::Merge;
+use Hash::Merge qw( merge );
 use Find::Lib;
 use Hash::Merge;
 use Modern::Perl;
