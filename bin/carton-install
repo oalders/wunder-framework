@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# run this from the top level of a repo which includes this repo as a submodule
+
+PERL_CARTON_PATH=local carton install --cpanfile inc/wunder-framework/cpanfile
