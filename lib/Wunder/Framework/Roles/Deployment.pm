@@ -69,10 +69,11 @@ sub _build_path {
 
     my @dirs = split "/", Find::Lib::base();
 
-    croak "no path" if scalar @dirs < 5;
+    croak "no path" if scalar @dirs < 4;
+    my $terminal_folder = $dirs[2] eq 'wunderadmin' ? 3 : 4;
 
     # pattern is /home/co/stream/site
-    return join "/", @dirs[ 0 .. 4 ];
+    return join "/", @dirs[ 0 .. $terminal_folder ];
 
 }
 
