@@ -15,14 +15,20 @@ use MooseX::NonMoose;
 use MooseX::Params::Validate;
 use Params::Validate qw( validate validate_pos SCALAR );
 use Wunder::Framework::Tools::FormBuilder;
-use Wunder::Framework::Tools::Toolkit qw( commify converter get_dt round moneypad );
+use Wunder::Framework::Tools::Toolkit
+    qw( commify converter get_dt round moneypad );
 
 extends qw( CGI::Application::Plugin::HTDot CGI::Application );
 
-with 'Wunder::Framework::Roles::Config',
-    'Wunder::Framework::Roles::Deployment', 'Wunder::Framework::Roles::DBI',
-    'Wunder::Framework::Roles::DateTime',   'Wunder::Framework::Roles::Email',
-    'Wunder::Framework::Roles::Geo',        'Wunder::Framework::Roles::Log';
+with(
+    'Wunder::Framework::Roles::Config',
+    'Wunder::Framework::Roles::Deployment',
+    'Wunder::Framework::Roles::DBI',
+    'Wunder::Framework::Roles::DateTime',
+    'Wunder::Framework::Roles::Email',
+    'Wunder::Framework::Roles::Geo',
+    'Wunder::Framework::Roles::Log'
+);
 
 has 'env' => (
     is         => 'ro',
@@ -31,22 +37,17 @@ has 'env' => (
 );
 
 has 'fb' => (
-    is         => 'ro',
-    isa        => 'Wunder::Framework::Tools::FormBuilder',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Wunder::Framework::Tools::FormBuilder',
+    lazy    => 1,
+    default => sub {
+        my $fb = Wunder::Framework::Tools::FormBuilder->new( encode_this => 0 );
+        $fb->encode_this( 1 );
+        return $fb;
+    },
 );
 
-sub _build_fb {
-
-    my $self = shift;
-    my $fb   = Wunder::Framework::Tools::FormBuilder->new;
-    $fb->encode_this( 1 );
-    return $fb;
-
-}
-
 sub cgiapp_init {
-
     my $self = shift;
 
     $self->param( server_name => $self->env->{HTTP_HOST} );
@@ -71,11 +72,9 @@ sub cgiapp_init {
     $self->template->config( %{ $self->template_config } );
 
     return $self->SUPER::cgiapp_init();
-
 }
 
 sub template_config {
-
     my $self = shift;
 
     return {
@@ -88,11 +87,9 @@ sub template_config {
             FILTERS            => $self->tt_filters,
         },
     };
-
 }
 
 sub load_tmpl {
-
     my ( $self, $tmpl_file, @extra_params ) = @_;
 
     push @extra_params, "die_on_bad_params", "0";
@@ -113,15 +110,15 @@ sub is_plack {
 }
 
 sub _error_handler {
-
     my $self = shift;
 
     my %env = %{ $self->env };
 
     # don't send messages from testbed
-    if ( exists $env{HARNESS_ACTIVE} ) {
-        return;
-    }
+    return
+        if exists $env{HARNESS_ACTIVE}
+        || ( exists $self->config->{mail_errors}
+        && !$self->config->{mail_errors} );
 
     my $server
         = $self->param( 'server_name' )
@@ -135,16 +132,15 @@ sub _error_handler {
         $error_data .= "http://$server$env{REQUEST_URI}&admin_key=$key\n\n";
     }
 
-    #$error_data .= $self->dump();
     $error_data .= dump \%env;
     $error_data .= dump( { $self->query->Vars } );
     $error_data .= "\n@_\n";
-    $error_data .= "tmpl_path: " . dump( $self->tmpl_path );
+    $error_data .= 'tmpl_path: ' . dump( $self->tmpl_path );
 
     $self->logger( $error_data );
 
     if ( $self->param( 'username' ) ) {
-        $error_data .= "username: " . $self->param( 'username' );
+        $error_data .= 'username: ' . $self->param( 'username' );
     }
 
     my $msg = MIME::Lite->new(
@@ -177,11 +173,9 @@ sub _error_handler {
         informed. If this error is not fixed in a timely manner, please
         contact <a href="mailto:$support">$support</a></body></html>
     ];
-
 }
 
 sub add_to_path {
-
     my $self = shift;
     my $add  = shift;
     return $self->tmpl_path if !$add;
@@ -201,18 +195,14 @@ sub add_to_path {
     $self->tmpl_path( \@path );
 
     return $self->tmpl_path();
-
 }
 
 sub push_tmpl_path {
-
     my $self = shift;
     return $self->add_to_path( @_ );
-
 }
 
 sub tt_filters {
-
     my $self = shift;
 
     return {
@@ -246,19 +236,15 @@ sub tt_filters {
         },
 
     };
-
 }
 
 sub tt {
-
     my $self = shift;
     return $self->template->fill( shift() || $self->get_current_runmode,
         $self->stash );
-
 }
 
 sub not_found {
-
     my $self = shift;
 
     if ( exists $ENV{'MOD_PERL'} ) {
@@ -267,12 +253,10 @@ sub not_found {
     }
 
     $self->header_props( -status => 404 );
-    return $self->status_msg( "404: Not Found" );
-
+    return $self->status_msg( '404: Not Found' );
 }
 
 sub unauthorized {
-
     my $self = shift;
 
     if ( exists $ENV{'MOD_PERL'} ) {
@@ -281,12 +265,10 @@ sub unauthorized {
     }
 
     $self->header_props( -status => 401 );
-    return $self->status_msg( "401: Unauthorized" );
-
+    return $self->status_msg( '401: Unauthorized' );
 }
 
 sub bad_request {
-
     my $self = shift;
 
     if ( exists $ENV{'MOD_PERL'} ) {
@@ -295,25 +277,21 @@ sub bad_request {
     }
 
     $self->header_props( -status => 400 );
-    return $self->status_msg( "400: Bad Request" );
-
+    return $self->status_msg( '400: Bad Request' );
 }
 
 sub status_msg {
-
     my $self = shift;
     my $msg  = shift;
 
     if ( exists $self->stash->{'status_error'} ) {
-        $msg .= " (" . $self->stash->{'status_error'} . ")";
+        $msg .= ' (' . $self->stash->{'status_error'} . ')';
     }
 
     return $msg;
-
 }
 
 sub stash_cols {
-
     my $self = shift;
     my @args = validate_pos( @_, { isa => 'DBIx::Class' } );
     my $dbic = shift @args;
@@ -324,7 +302,6 @@ sub stash_cols {
     }
 
     return;
-
 }
 
 __PACKAGE__->meta->make_immutable();
@@ -416,7 +393,6 @@ Enable this in your class by adding the following to setup()
 $self->error_mode( '_error_handler' );
 
 =cut
-
 
 =head1 AUTHOR
 

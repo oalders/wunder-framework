@@ -19,6 +19,7 @@ use Encode;
 use Locale::Country qw( code2country );
 use Locale::SubCountry;
 use Modern::Perl;
+use MooseX::StrictConstructor;
 use Params::Validate qw( validate validate_pos SCALAR ARRAYREF HASHREF );
 use Perl6::Junction qw( any );
 use Scalar::Util qw( reftype );
@@ -39,22 +40,23 @@ my %menu_rules = (
 has 'encode_this' => (
     is            => 'rw',
     isa           => 'Bool',
+    lazy          => 1,
     default       => 0,
-    documentation => 'Enable if output is not utf8'
+    documentation => 'Enable if output is not utf8',
 );
 
 has 'ip' => (
     is            => 'rw',
     isa           => 'Str',
     default       => $ENV{REMOTE_ADDR},
-    documentation => 'useful when run under Plack'
+    documentation => 'useful when run under Plack',
 );
 
 has 'user_country' => (
     is         => 'rw',
     isa        => 'Maybe[Str]',
     lazy_build => 1,
-    builder    => 'get_user_country'
+    builder    => 'get_user_country',
 );
 
 has 'verbose' => (
@@ -146,7 +148,6 @@ Returns an ARRAYREF of table column names, keeping the table order intact.
 =cut
 
 sub get_column_names {
-
     my $self = shift;
 
     my %rules = (
@@ -163,7 +164,6 @@ sub get_column_names {
     }
 
     return \@names;
-
 }
 
 =head2 build_form( table => 'my_table', size => $integer )
@@ -173,7 +173,6 @@ Return an ARRAYREF that HTML::Template can turn into a form
 =cut
 
 sub build_form {
-
     my $self = shift;
     my $q    = CGI->new();
 
@@ -492,7 +491,6 @@ Convert an ARRAYREF to a HASHREF
 =cut
 
 sub array_to_hash {
-
     my $self  = shift;
     my $array = shift;
 
@@ -506,7 +504,6 @@ sub array_to_hash {
     }
 
     return $hashref;
-
 }
 
 =head2 country_codes
