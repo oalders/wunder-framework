@@ -33,6 +33,7 @@ requires 'Math::Round';
 requires 'MIME::Lite';
 requires 'Modern::Perl';
 requires 'MooseX::Getopt';
+requires 'MooseX::StrictConstructor';
 requires 'MooseX::NonMoose';
 requires 'MooseX::Params::Validate';
 requires 'Net::Twitter';
