@@ -114,12 +114,6 @@ sub _error_handler {
 
     my %env = %{ $self->env };
 
-    # don't send messages from testbed
-    return
-        if exists $env{HARNESS_ACTIVE}
-        || ( exists $self->config->{mail_errors}
-        && !$self->config->{mail_errors} );
-
     my $server
         = $self->param( 'server_name' )
         || $env{SERVER_NAME}
@@ -138,6 +132,13 @@ sub _error_handler {
     $error_data .= 'tmpl_path: ' . dump( $self->tmpl_path );
 
     $self->logger( $error_data );
+
+    # don't send messages from testbed
+    return
+        if exists $env{HARNESS_ACTIVE}
+        || ( exists $self->config->{mail_errors}
+        && !$self->config->{mail_errors} );
+
 
     if ( $self->param( 'username' ) ) {
         $error_data .= 'username: ' . $self->param( 'username' );
