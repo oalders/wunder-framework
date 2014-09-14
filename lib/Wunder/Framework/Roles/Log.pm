@@ -26,11 +26,11 @@ has 'logger_object' => (
 );
 
 sub logger {
-
     my $self = shift;
-    $self->logger_object->info( @_ );
-    return 1;
+    my @caller = caller();
 
+    $self->logger_object->info( join ' ', $caller[1], $caller[2], @_ );
+    return 1;
 }
 
 {
