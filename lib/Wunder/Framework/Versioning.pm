@@ -260,7 +260,7 @@ sub back_up {
     }
 
     my $dump = " mysqldump --skip-add-drop-table ";
-    $dump .= " -u $cfg->{'user'} -p$cfg->{'pass'} ";
+    $dump .= qq{ -u $cfg->{'user'} -p"$cfg->{'pass'}" };
     $dump .= " -h $cfg->{'host'}  $db->{'database'} ";
 
     if ( $action eq 'upgrade'
