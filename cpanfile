@@ -37,6 +37,7 @@ requires 'MooseX::StrictConstructor';
 requires 'MooseX::NonMoose';
 requires 'MooseX::Params::Validate';
 requires 'Net::Twitter';
+requires 'Params::Validate', '1.29';
 requires 'Perl6::Junction';
 requires 'Scalar::Util::Numeric';
 requires 'String::Random';
