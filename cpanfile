@@ -18,7 +18,7 @@ requires 'DateTime::Format::Mail';
 requires 'DateTime::Format::MySQL';
 requires 'DBIx::Class';
 requires 'Devel::SimpleTrace';
-requires 'Email::Sender::Simple';
+requires 'Email::Sender::Simple', '1.300031';
 requires 'Email::Valid';
 requires 'File::MimeInfo::Magic';
 requires 'File::Slurp';
