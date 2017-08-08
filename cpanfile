@@ -16,6 +16,7 @@ requires 'DateTime';
 requires 'DateTime::Format::ISO8601';
 requires 'DateTime::Format::Mail';
 requires 'DateTime::Format::MySQL';
+requires 'DBD::SQLite'; # Locale::Object
 requires 'DBIx::Class';
 requires 'Devel::SimpleTrace';
 requires 'Email::Sender::Simple', '1.300031';
