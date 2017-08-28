@@ -3,7 +3,6 @@
 use Data::Dump qw( dump );
 use Find::Lib '../lib';
 use Modern::Perl;
-use Perl6::Junction qw( none );
 use Test::More skip_all => 'slowing down test suite';
 
 require_ok( 'Wunder::Framework::Tools::Build::CPAN' );

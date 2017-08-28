@@ -15,8 +15,8 @@ use File::Spec;
 use Graphics::Magick;
 use Image::ExifTool qw(:Public);
 use Image::Size;
+use List::Util qw( any );
 use Params::Validate qw( SCALAR SCALARREF validate validate_pos );
-use Perl6::Junction qw( any );
 use Scalar::Util qw( openhandle );
 
 @EXPORT_OK = qw(
@@ -237,7 +237,7 @@ sub correct_colorspace {
 
     my @correctable = qw( image/png image/jpg image/pjpeg image/jpeg );
 
-    if ( any( @correctable ) eq $info->{'MIMEType'} ) {
+    if ( any { $_ eq $info->{'MIMEType'} } @correctable ) {
 
         $magick->Set( colorspace => 'RGB' );
 

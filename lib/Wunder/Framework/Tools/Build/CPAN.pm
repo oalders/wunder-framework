@@ -4,6 +4,12 @@ use Moose;
 use MooseX::Params::Validate;
 use Modern::Perl;
 
+use Data::Dump qw( dump );
+use File::Find::Object::Rule;
+use Find::Lib;
+use List::Util qw( any );
+use YAML::Syck;
+
 =head1 SYNOPSIS
 
 Try to find all of the dependencies for a code distribution.
@@ -22,11 +28,6 @@ Supply an ARRAYREF of regexes to be used when ignoring modules
 
 =cut
 
-use Data::Dump qw( dump );
-use File::Find::Object::Rule;
-use Find::Lib;
-use Perl6::Junction qw( any );
-use YAML::Syck;
 
 has 'ignore' => ( is => 'rw', isa => 'ArrayRef', default => sub { [] } );
 has 'ignore_regex' =>
@@ -78,7 +79,7 @@ sub find_deps {
     foreach my $key ( sort keys %mods ) {
 
         delete $mods{$key} if $key =~ m{\AWunder};
-        delete $mods{$key} if ( any( @{ $self->ignore } ) eq $key );
+        delete $mods{$key} if any { $_ eq $key } @{ $self->ignore };
 
     REGEX:
         foreach my $regex ( @{ $self->ignore_regex } ) {

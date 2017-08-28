@@ -3,8 +3,8 @@ package Wunder::Framework::Image;
 use Moose;
 
 use Modern::Perl;
+use List::Util qw( any );
 use Params::Validate qw( SCALAR SCALARREF validate validate_pos );
-use Perl6::Junction qw( any );
 use Image::ExifTool;
 
 with 'Wunder::Framework::Roles::Config';
@@ -87,20 +87,16 @@ $image->Quantize(colorspace=>'gray');
 =cut
 
 sub correct_colorspace {
-
     my $self   = shift;
     my $magick = $self->magick;
 
     my @correctable = qw( image/png image/jpg image/pjpeg image/jpeg );
 
-    if ( any( @correctable ) eq $self->info->{'MIMEType'} ) {
-
+    if ( any { $_ eq $self->info->{'MIMEType'} } @correctable ) {
         $magick->Set( colorspace => 'RGB' );
-
     }
 
     return;
-
 }
 
 =head2 resize_ok

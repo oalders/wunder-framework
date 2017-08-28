@@ -8,8 +8,8 @@ extends 'Wunder::Framework::CAP::Super';
 use Wunder::Framework::Tools::Toolkit qw( forcearray );
 
 use Data::Dumper;
-use MIME::Lite;
-use Perl6::Junction qw( any );
+use List::Util qw( any );
+use MIME::Lite ();
 
 has 'email_from' => (
     is      => 'rw',
@@ -199,7 +199,7 @@ sub text_message {
 
         # tampered values?
         next if $label ne $name;
-        next if ( any( @ignore ) eq $label );
+        next if any { $_ eq $label } @ignore;
 
         my $value = $self->filter( $q->param( $label ) );
 

@@ -16,12 +16,12 @@ use Carp;
 use CGI;
 use Data::Dump qw( dump );
 use Encode;
+use List::Util qw( any );
 use Locale::Country qw( code2country );
 use Locale::SubCountry;
 use Modern::Perl;
 use MooseX::StrictConstructor;
 use Params::Validate qw( validate validate_pos SCALAR ARRAYREF HASHREF );
-use Perl6::Junction qw( any );
 use Scalar::Util qw( reftype );
 use Text::Autoformat;
 
@@ -264,7 +264,7 @@ sub build_form {
                 );
             }
 
-            elsif ( any( @password ) eq $name ) {
+            elsif ( any { $_ eq $name } @password  ) {
 
                 $element = $q->password_field(
                     -name      => $name,
@@ -305,7 +305,7 @@ sub build_form {
                     );
                 }
                 elsif ( $args{'dwiw'}
-                    && any( 'expiration_month', 'expiration_year' ) eq $name )
+                    && any { $_ eq $name } ( 'expiration_month', 'expiration_year' ) )
                 {
                     $element = $self->$name;
                 }
@@ -420,7 +420,7 @@ sub build_form {
 
         }
 
-        elsif ( any( 'datetime', 'timestamp' ) eq $col->{'type'} ) {
+        elsif ( any { $_ eq $col->{'type'} } ( 'datetime', 'timestamp' ) ) {
 
             $element
                 = $self->get_date_menu( name => $name, readonly => $disable );

@@ -2,7 +2,7 @@
 
 use Modern::Perl;
 
-use Perl6::Junction qw( any );
+use List::Util qw( any );
 
 `dpkg -l > installed.packages`;
 
@@ -20,7 +20,7 @@ while ( <FILE> ) {
     $line =~ s/^ii  //;
     $line =~ s/\s.*//g;
 
-    next LINE if ( any( @ignore ) eq $line );
+    next LINE if any { $_ eq $line } @ignore;
 
     push @pkgs, $line;
 }

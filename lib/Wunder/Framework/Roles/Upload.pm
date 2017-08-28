@@ -5,9 +5,9 @@ use Moose::Role;
 use Digest::MD5 qw/md5_hex/;
 use File::Copy;
 use File::MimeInfo::Magic;
+use List::Util qw( any );
 use Params::Validate qw( SCALAR SCALARREF validate validate_pos );
 use Path::Class;
-use Perl6::Junction qw( any );
 
 =head2 make_path( $params )
 
@@ -39,7 +39,7 @@ sub make_path {
         $extension = $1;
     }
 
-    if ( any( 'jpeg', 'pjpeg' ) eq $extension ) {
+    if ( any { $_  eq $extension } ( 'jpeg', 'pjpeg' ) )  {
         $extension = 'jpg';
     }
 
