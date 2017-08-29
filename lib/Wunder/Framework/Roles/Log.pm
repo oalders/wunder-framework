@@ -64,7 +64,7 @@ log4perl.rootLogger=DEBUG, LOGFILE
 log4perl.category.Wunder.Base = DEBUG, LOGFILE
 
 log4perl.appender.LOGFILE=Log::Log4perl::Appender::File
-log4perl.appender.LOGFILE.filename=$path/logs/perl.log
+log4perl.appender.LOGFILE.filename=$path/var/log/perl.log
 log4perl.appender.LOGFILE.mode=append
 
 log4perl.appender.LOGFILE.layout=PatternLayout
