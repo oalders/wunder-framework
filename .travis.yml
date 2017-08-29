@@ -10,6 +10,7 @@ before_install:
   - gunzip GeoLiteCity.dat.gz
   - sudo cp GeoLiteCity.dat /usr/local/share/GeoIP/
   - sudo cp GeoLiteCity.dat /usr/share/GeoIP/
+  - mkdir -p var/log
 
 install:
   - cpanm --quiet --installdeps --notest .
