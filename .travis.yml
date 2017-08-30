@@ -1,7 +1,6 @@
 language: perl
 perl:
-  - "5.16"
-  - "5.14"
+  - "5.18"
 before_install:
   - sudo apt-get install --assume-yes geoip-database geoip-bin libgeoip-dev
   - sudo mkdir -p /usr/local/share/GeoIP
@@ -11,7 +10,6 @@ before_install:
   - sudo cp GeoLiteCity.dat /usr/local/share/GeoIP/
   - sudo cp GeoLiteCity.dat /usr/share/GeoIP/
   - mkdir -p var/log
-
 install:
   - cpanm --quiet --installdeps --notest .
 script:
