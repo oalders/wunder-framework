@@ -1,4 +1,4 @@
-use Test::Most;
+use Test::More;
 
 use Data::Printer;
 use Try::Tiny;

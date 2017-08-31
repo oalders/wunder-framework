@@ -1,4 +1,4 @@
-use Test::Most;
+use Test::More;
 use Wunder::Framework::Test::Roles::DBI;
 
 my $test = Wunder::Framework::Test::Roles::DBI->new;

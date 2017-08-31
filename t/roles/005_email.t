@@ -1,4 +1,4 @@
-use Test::Most;
+use Test::More;
 
 BEGIN { $ENV{EMAIL_SENDER_TRANSPORT} = 'Test' }
 

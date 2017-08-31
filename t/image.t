@@ -1,4 +1,4 @@
-use Test::Most skip_all => 'Moving away from Image::Magick';
+use Test::More skip_all => 'Moving away from Image::Magick';
 
 use Find::Lib;
 require_ok( 'Wunder::Framework::Image' );
