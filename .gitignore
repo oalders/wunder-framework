@@ -1,8 +1,9 @@
-*.swp
-.tidyall*
-.tidyallrc
 cpanfile.snapshot
 local
 logs/*
 perltidy.LOG
+*.swp
+.tidyall*
+.tidyallrc
 t/resources/tmp_logo.png
+var
